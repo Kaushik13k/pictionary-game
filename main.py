@@ -5,21 +5,12 @@ from contextlib import asynccontextmanager
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI, Request
 from starlette.routing import Match
-from starlette.middleware import Middleware
-from starlette_context import plugins
+import socketio
 
-from routers import health
+from routers import health, sockets, rooms
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-
-
-# middleware = [
-#     Middleware(
-#         plugins=(plugins.RequestIdPlugin(), plugins.CorrelationIdPlugin()),
-#     )
-# ]
-
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -36,8 +27,9 @@ app = FastAPI(
     contact={"name": "Kaushik", "email": "13kaushikk@gmail.com"},
     debug=True,
     lifespan=lifespan,
-    # middleware=middleware,
 )
+
+socket_io = sockets.create_sio()
 
 
 @app.middleware("https")
@@ -67,7 +59,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(health.router)
+app.include_router(health.router, prefix="/v1")
+app.include_router(rooms.router, prefix="/v1")
+app.mount("/", socketio.ASGIApp(socket_io))
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
