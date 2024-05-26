@@ -7,7 +7,10 @@ class SocketEventDispatcher:
         self.events = {}
 
     def register_event(self, event_name, event):
-        self.events[event_name] = event
+        if event_name not in self.events:
+            self.events[event_name] = event
+        else:
+            print(f"Event {event_name} is already registered.")
 
     async def dispatch_event(self, sio, event_name, sid, data):
         event = self.events.get(event_name)
