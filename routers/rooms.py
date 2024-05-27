@@ -9,6 +9,5 @@ async def fetch_rooms():
     rooms = []
     for key in redis_keys:
         room_id = (key.decode()).split("room_id:")[1]
-        print(room_id)
         rooms.append(room_id)
     return {"rooms": rooms, "response": 200}
