@@ -1,5 +1,6 @@
 from services.create_room import CreateRoom
 from services.join_room import JoinRoom
+from services.health import Health
 from init.socket_init import socket_io
 
 
@@ -19,9 +20,13 @@ class SocketEventDispatcher:
             await event.handle(sio, sid, data)
 
 dispatcher = SocketEventDispatcher()
+dispatcher.register_event('health', Health())
 dispatcher.register_event('create_room', CreateRoom())
 dispatcher.register_event('join_room', JoinRoom())
 
+@socket_io.on('health')
+async def health(sid, data):
+    await dispatcher.dispatch_event(socket_io, 'health', sid, data)
 
 @socket_io.on('create_room')
 async def create_room(sid, username):
