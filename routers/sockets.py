@@ -1,4 +1,5 @@
 from services.create_room import CreateRoom
+from services.join_room import JoinRoom
 from init.socket_init import socket_io
 
 
@@ -19,10 +20,17 @@ class SocketEventDispatcher:
 
 dispatcher = SocketEventDispatcher()
 dispatcher.register_event('create_room', CreateRoom())
+dispatcher.register_event('join_room', JoinRoom())
+
 
 @socket_io.on('create_room')
 async def create_room(sid, username):
     await dispatcher.dispatch_event(socket_io, 'create_room', sid, username)
+
+@socket_io.on('join_room')
+async def join_room(sid, room):
+    await dispatcher.dispatch_event(socket_io, 'join_room', sid, room)
+
 
 def create_sio():
     return socket_io

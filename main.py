@@ -31,7 +31,6 @@ app = FastAPI(
 
 socket_io = sockets.create_sio()
 
-
 @app.middleware("https")
 async def log_middlewear(request: Request, call_next):
     logger.info(f"{request.method} {request.url}")
