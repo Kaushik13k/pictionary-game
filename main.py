@@ -12,6 +12,7 @@ from routers import health, sockets, rooms
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # startup
@@ -30,6 +31,7 @@ app = FastAPI(
 )
 
 socket_io = sockets.create_socket()
+
 
 @app.middleware("https")
 async def log_middlewear(request: Request, call_next):
