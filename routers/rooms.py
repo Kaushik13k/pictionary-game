@@ -5,7 +5,7 @@ router = APIRouter()
 
 @router.get("/rooms", tags=["Rooms"], responses={404: {"description": "Not found"}})
 async def fetch_rooms():
-    print("inside fetch rooms")
+    print("insocket_ide fetch rooms")
     keys = redis_init.keys('*')
     rooms = []
     print(keys)

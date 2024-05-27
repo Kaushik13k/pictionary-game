@@ -8,16 +8,16 @@ class SocketEventDispatcher:
     def __init__(self):
         self.events = {}
 
-    def register_event(self, event_name, event):
+    def register_event(self, event_name: str, event: str):
         if event_name not in self.events:
             self.events[event_name] = event
         else:
             print(f"Event {event_name} is already registered.")
 
-    async def dispatch_event(self, sio, event_name, sid, data):
+    async def dispatch_event(self, sio: str, event_name: str, socket_id: str, data: str):
         event = self.events.get(event_name)
         if event is not None:
-            await event.handle(sio, sid, data)
+            await event.handle(sio, socket_id, data)
 
 dispatcher = SocketEventDispatcher()
 dispatcher.register_event('health', Health())
@@ -25,17 +25,17 @@ dispatcher.register_event('create_room', CreateRoom())
 dispatcher.register_event('join_room', JoinRoom())
 
 @socket_io.on('health')
-async def health(sid, data):
-    await dispatcher.dispatch_event(socket_io, 'health', sid, data)
+async def health(socket_id: str, data: str):
+    await dispatcher.dispatch_event(socket_io, 'health', socket_id, data)
 
 @socket_io.on('create_room')
-async def create_room(sid, username):
-    await dispatcher.dispatch_event(socket_io, 'create_room', sid, username)
+async def create_room(socket_id: str, username: str):
+    await dispatcher.dispatch_event(socket_io, 'create_room', socket_id, username)
 
 @socket_io.on('join_room')
-async def join_room(sid, room):
-    await dispatcher.dispatch_event(socket_io, 'join_room', sid, room)
+async def join_room(socket_id: str, room: str):
+    await dispatcher.dispatch_event(socket_io, 'join_room', socket_id, room)
 
 
-def create_sio():
+def create_socket():
     return socket_io

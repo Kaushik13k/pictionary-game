@@ -29,7 +29,7 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-socket_io = sockets.create_sio()
+socket_io = sockets.create_socket()
 
 @app.middleware("https")
 async def log_middlewear(request: Request, call_next):
