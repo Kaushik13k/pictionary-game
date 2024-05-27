@@ -8,12 +8,12 @@ class JoinRoom(SocketEvent):
         username = json.loads(username)
         await sio.enter_room(socket_id, username["userName"])
 
-        key = f"room_id:{socket_id}"
-        room_details = json.loads(redis_init.get(key))
+        redis_key = f"room_id:{socket_id}"
+        room_details = json.loads(redis_init.get(redis_key))
 
         room_details["members"].append(username["userName"])
 
-        redis_init.set(key, json.dumps(room_details))
+        redis_init.set(redis_key, json.dumps(room_details))
         await sio.emit(
             "join_room",
             {
