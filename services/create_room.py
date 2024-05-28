@@ -37,6 +37,7 @@ class CreateRoom(SocketEvent):
                         "status": ResultStatus.SUCCESS.value,
                         "room_id": socket_id,
                         "creator": username["userName"],
+                        "members": user_data["members"],
                         "message": f"Room Created",
                     },
                     room=socket_id,
