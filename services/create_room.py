@@ -23,9 +23,9 @@ class CreateRoom(SocketEvent):
             username = json.loads(username)
             user_data = {
                 "creator": username["userName"],
-                "members": [username["userName"]],
+                "members": [{"player_id": 1, "is_active": True, "player_name": username["userName"], "score": 0}],
             }
-            redis_key = f"room_id:{socket_id}"
+            redis_key = f"room_id_players:{socket_id}"
             result = redis_init.execute_command(
                 RedisOperations.JSON_SET.value, redis_key, "$", json.dumps(user_data)
             )

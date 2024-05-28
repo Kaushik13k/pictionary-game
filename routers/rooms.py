@@ -17,7 +17,7 @@ async def fetch_rooms():
         redis_keys = redis_init.keys("*")
         rooms = []
         for key in redis_keys:
-            room_id = (key.decode()).split("room_id:")[1]
+            room_id = (key.decode()).split("room_id_players:")[1]
             rooms.append(room_id)
         return success(rooms, message="Rooms fetched successfully")
     except Exception as e:

@@ -20,17 +20,21 @@ class JoinRoom(SocketEvent):
                 f"Handling join_room event for socket_id {socket_id} and username {username}"
             )
             username = json.loads(username)
+            # [{"player_id": 1, "is_active": True, "player_id": username["userName"], "score": 0}]
             await sio.enter_room(socket_id, username["userName"])
 
-            redis_key = f"room_id:{socket_id}"
+            redis_key = f"room_id_players:{socket_id}"
             initial_arr_length = redis_init.execute_command(
                 RedisOperations.JSON_ARRAY_LENGTH.value, redis_key, ".members"
             )
+            latest_player_id = int((redis_init.execute_command(RedisOperations.JSON_GET.value, redis_key, '.members[-1].player_id')).decode("utf-8"))
+            logger.info(f"Latest player id: {latest_player_id}")
+
             redis_init.execute_command(
                 RedisOperations.JSON_ARRAY_APPEND.value,
                 redis_key,
                 ".members",
-                json.dumps(username["userName"]),
+                json.dumps({"player_id":latest_player_id+1, "is_active": True, "player_name": username["userName"], "score": 0}),
             )
             updated_arr_length = redis_init.execute_command(
                 RedisOperations.JSON_ARRAY_LENGTH.value, redis_key, ".members"
