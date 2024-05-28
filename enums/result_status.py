@@ -1,5 +1,5 @@
 from enum import Enum
 
 class ResultStatus(Enum):
-    SUCCESS = "success"
-    FAILURE = "failure"
+    SUCCESS = "Success"
+    FAILURE = "Failure"
