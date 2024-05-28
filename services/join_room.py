@@ -6,6 +6,9 @@ from init.redis_init import redis_init
 from services.socket_event import SocketEvent
 from exceptions.exceptions import JoinRoomException
 
+from enums.result_status import ResultStatus
+from enums.redis_operations import RedisOperations
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -21,27 +24,31 @@ class JoinRoom(SocketEvent):
 
             redis_key = f"room_id:{socket_id}"
             initial_arr_length = redis_init.execute_command(
-                "JSON.ARRLEN", redis_key, ".members"
+                RedisOperations.JSON_ARRAY_LENGTH.value, redis_key, ".members"
             )
             redis_init.execute_command(
-                "JSON.ARRAPPEND",
+                RedisOperations.JSON_ARRAY_APPEND.value,
                 redis_key,
                 ".members",
                 json.dumps(username["userName"]),
             )
             updated_arr_length = redis_init.execute_command(
-                "JSON.ARRLEN", redis_key, ".members"
+                RedisOperations.JSON_ARRAY_LENGTH.value, redis_key, ".members"
             )
             logger.info(
                 f"Increased members array length from {initial_arr_length} to {updated_arr_length}"
             )
             if initial_arr_length < updated_arr_length:
-                user = json.loads(redis_init.execute_command("JSON.GET", redis_key))
+                user = json.loads(
+                    redis_init.execute_command(
+                        RedisOperations.JSON_GET.value, redis_key
+                    )
+                )
                 logger.info(f"Updated room details in Redis for key {redis_key}")
                 await sio.emit(
                     "join_room",
                     {
-                        "status": "success",
+                        "status": ResultStatus.SUCCESS.value,
                         "room_id": socket_id,
                         "creator": user["creator"],
                         "members": user["members"],
@@ -62,7 +69,7 @@ class JoinRoom(SocketEvent):
             await sio.emit(
                 "join_room",
                 {
-                    "status": "failure",
+                    "status": ResultStatus.FAILURE.value,
                     "room_id": socket_id,
                     "message": f"Error joining room",
                 },
