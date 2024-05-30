@@ -20,7 +20,6 @@ class JoinRoom(SocketEvent):
                 f"Handling join_room event for socket_id {socket_id} and username {username}"
             )
             username = json.loads(username)
-            # [{"player_id": 1, "is_active": True, "player_id": username["userName"], "score": 0}]
             await sio.enter_room(socket_id, username["userName"])
 
             redis_key = f"room_id_players:{socket_id}"

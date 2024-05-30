@@ -5,6 +5,7 @@ from services.health import Health
 from init.socket_init import socket_io
 from services.join_room import JoinRoom
 from services.create_room import CreateRoom
+from services.start_game import StartGame
 from enums.socket_operations import SocketOperations
 
 logging.basicConfig(level=logging.INFO)
@@ -37,6 +38,7 @@ dispatcher = SocketEventDispatcher()
 dispatcher.register_event(SocketOperations.HEALTH.value, Health())
 dispatcher.register_event(SocketOperations.CREATE.value, CreateRoom())
 dispatcher.register_event(SocketOperations.JOIN.value, JoinRoom())
+dispatcher.register_event(SocketOperations.START_GAME.value, StartGame())
 
 
 @socket_io.on(SocketOperations.HEALTH.value)
@@ -54,11 +56,17 @@ async def create_room(socket_id: str, username: str):
 
 
 @socket_io.on(SocketOperations.JOIN.value)
-async def join_room(socket_id: str, room: str):
+async def join_room(socket_id: str, username: str):
     await dispatcher.dispatch_event(
-        socket_io, SocketOperations.JOIN.value, socket_id, room
+        socket_io, SocketOperations.JOIN.value, socket_id, username
     )
 
+
+@socket_io.on(SocketOperations.START_GAME.value)
+async def start_game(socket_id: str, username: str):
+    await dispatcher.dispatch_event(
+        socket_io, SocketOperations.START_GAME.value, socket_id, username
+    )
 
 def create_socket():
     return socket_io
