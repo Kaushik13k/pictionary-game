@@ -1,0 +1,17 @@
+version: "3.9"
+
+services:
+  pictionary-redis:
+    image: redislabs/rejson:latest
+    ports:
+      - "6379:6379"
+    container_name: pictionary-redisjson
+
+  pictionary-app:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - REDIS_HOST=pictionary-redis
+    depends_on:
+      - pictionary-redis
