@@ -12,12 +12,12 @@ services:
     ports:
       - name: http
         port: 8000
-  - type: web
+  - type: private-service
     name: pictionary-redis
     env: docker
     dockerfilePath: ./redis.Dockerfile
-    instances: 1
     plan: free
-    ports:
-      - name: redis
-        port: 6379
+    docker:
+      instances: 1
+      ports:
+        - port: 6379
