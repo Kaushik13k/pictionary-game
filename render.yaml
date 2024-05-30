@@ -1,5 +1,5 @@
 services:
-  - type: web
+  - type: worker
     name: pictionary-app
     env: docker
     dockerfilePath: ./Dockerfile
@@ -17,4 +17,3 @@ services:
     env: docker
     dockerfilePath: ./redis.Dockerfile
     plan: free
-    numInstances: 1
