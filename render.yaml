@@ -8,6 +8,7 @@ services:
     envVars:
       - key: REDIS_HOST
         value: pictionary-redis
+    numInstances: 1
     port:
       - name: http
         port: 8000
@@ -16,3 +17,4 @@ services:
     env: docker
     dockerfilePath: ./redis.Dockerfile
     plan: free
+    numInstances: 1
