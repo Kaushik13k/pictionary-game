@@ -1,5 +1,5 @@
 services:
-  - type: service
+  - type: web
     name: pictionary-app
     env: docker
     dockerfilePath: ./Dockerfile
@@ -10,12 +10,11 @@ services:
         value: pictionary-redis
     instances: 1
     ports:
-      - port: 8000
-  - type: service
+      - name: http
+        port: 8000
+  - type: worker
     name: pictionary-redis
     env: docker
     dockerfilePath: ./redis.Dockerfile
     plan: free
     instances: 1
-    ports:
-      - port: 6379
