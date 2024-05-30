@@ -12,9 +12,12 @@ services:
     ports:
       - name: http
         port: 8000
-
-  - type: redis
+  - type: web
     name: pictionary-redis
-    image: redislabs/rejson:latest
+    env: docker
+    dockerfilePath: ./redis.Dockerfile
     instances: 1
     plan: free
+    ports:
+      - name: redis
+        port: 6379
