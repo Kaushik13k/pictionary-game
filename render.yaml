@@ -8,7 +8,7 @@ services:
     envVars:
       - key: REDIS_HOST
         value: pictionary-redis
-    ports:
+    port:
       - name: http
         port: 8000
   - type: worker
