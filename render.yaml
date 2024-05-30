@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: pictionary-app
+    env: docker
+    dockerfilePath: ./Dockerfile
+    buildCommand: ""
+    startCommand: ""
+    envVars:
+      - key: REDIS_HOST
+        value: pictionary-redis
+    instances: 1
+    ports:
+      - name: http
+        port: 8000
+
+  - type: redis
+    name: pictionary-redis
+    image: redislabs/rejson:latest
+    instances: 1
+    plan: free
