@@ -7,7 +7,7 @@ from fastapi import FastAPI, Request
 from starlette.routing import Match
 import socketio
 
-from routers import health, sockets, rooms
+from routers import create_room, join_room, health, sockets, rooms
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -52,15 +52,17 @@ async def log_middlewear(request: Request, call_next):
     return response
 
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# app.add_middleware(
+#     CORSMiddleware,
+#     allow_origins=["*"],
+#     allow_credentials=True,
+#     allow_methods=["*"],
+#     allow_headers=["*"],
+# )
 
 app.include_router(health.router, prefix="/v1")
+app.include_router(create_room.router, prefix="/v1")
+app.include_router(join_room.router, prefix="/v1")
 app.include_router(rooms.router, prefix="/v1")
 app.mount("/", socketio.ASGIApp(socket_io))
 

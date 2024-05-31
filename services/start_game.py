@@ -17,16 +17,17 @@ GUESS_TIME = 5
     
 
 class StartGame(SocketEvent):
-    async def handle(self, sio: str, socket_id: str, username: str):
+    async def handle(self, sio: str, socket_id: str, message: str):
         try:
-            logger.info(f"the recieved items are: {sio}, {socket_id}, {username}")
-            redis_key = f"room_id_players:{socket_id}"
-            game_key = f"room_id_game:{redis_key}"
+            room_id = json.loads(message)['room_id']
+            logger.info(f"the recieved items are: {sio}, {socket_id}, {message}")
+            redis_key = f"room_id_players:{room_id}"
+            game_key = f"room_id_game:{room_id}"
             game = await self.get_game_data(sio, socket_id, game_key)
             user = self.get_user_data(redis_key)
             players = user["members"]
             drawer_id = players[0]['player_id']
-            logger.info(f"Starting game for room {socket_id} with drawer {drawer_id}")
+            logger.info(f"Starting game for room {room_id} with drawer {drawer_id}")
 
             await sio.emit(SocketOperations.START_TURN.value, {'drawer_id': drawer_id}, room=socket_id)
             logger.info(f"Emitted start_turn event for room {socket_id}")
@@ -45,7 +46,7 @@ class StartGame(SocketEvent):
             logger.info(f"New player order: {players}")
             self.set_user_data(redis_key, user)
 
-            await self.handle(sio, socket_id, username=None)
+            await self.handle(sio, socket_id, message=message)
 
         except Exception as e:
             logger.error(e)
