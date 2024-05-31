@@ -13,6 +13,7 @@ This project is a Pictionary game implemented with Python and Docker. It's desig
 2. If not running in a container, create a Python virtual environment using the following command: `python3 -m pipenv shell`
 3. Run the app using Docker Compose: `docker-compose up` or use command `make up`
 4. To shut down the app and remove all images, use: `docker-compose down --rmi all` or use command `make down`
+5. OR just do `make all`
 
 ## API Endpoints
 
