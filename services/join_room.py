@@ -62,7 +62,7 @@ class JoinRoom(RoomEvents):
                 logger.info(f"Updated room details in Redis for key {redis_key}")
                 socket_link = self.generate_socket_link(self.room_data.room_id)
                 return success(
-                    {"socket-link": socket_link},
+                    {"socket_link": socket_link},
                     message="Rooms fetched successfully",
                 )
             else:

@@ -1,8 +1,10 @@
 import logging
-import traceback
+from fastapi import Header
 from fastapi import APIRouter
-from init.redis_init import redis_init
-from utils.api_response import success, error
+
+from models.fetch_rooms import FetchRoomsModel
+from services.fetch_rooms import FetchRooms
+
 
 router = APIRouter()
 
@@ -10,17 +12,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-@router.get("/rooms", tags=["Rooms"], responses={404: {"description": "Not found"}})
-async def fetch_rooms():
-    try:
-        logger.info("Fetching rooms..")
-        redis_keys = redis_init.keys("*")
-        rooms = []
-        for key in redis_keys:
-            room_id = (key.decode()).split("room_id_players:")[1]
-            rooms.append(room_id)
-        return success(rooms, message="Rooms fetched successfully")
-    except Exception as e:
-        logger.error(f"There was error fetching rooms: {e}")
-        logger.info(traceback.format_exc())
-        return error("Failed to fetch rooms")
+@router.get("/get-rooms", tags=["Rooms"], responses={404: {"description": "Not found"}})
+async def create_room(user_id: str = Header(None)):
+    room_factory = FetchRooms(user_id)
+    return await room_factory.handle_room()

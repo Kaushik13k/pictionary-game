@@ -41,7 +41,7 @@ class CreateRoom(RoomEvents):
             if result.decode("utf-8") == "OK":
                 logger.info(f"Set data in Redis for key {redis_key}")
                 return success(
-                    {"room-id": room_id, "socket-link": socket_link},
+                    {"room_id": room_id, "socket_link": socket_link},
                     message="Rooms fetched successfully",
                 )
 
