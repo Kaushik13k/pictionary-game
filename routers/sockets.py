@@ -22,14 +22,14 @@ class SocketEventDispatcher:
             logger.warning(f"Event {event_name} is already registered.")
 
     async def dispatch_event(
-        self, sio: str, event_name: str, socket_id: str, data: str
+        self, sio: str, event_name: str, socket_id: str, message: str
     ):
         logger.info(
-            f"Dispatching event {event_name} for socket {socket_id} with data {data}"
+            f"Dispatching event {event_name} for socket {socket_id} with data {message}"
         )
         event = self.events.get(event_name)
         if event is not None:
-            await event.handle(sio, socket_id, data)
+            await event.handle(sio, socket_id, message)
 
 
 dispatcher = SocketEventDispatcher()
@@ -49,6 +49,7 @@ async def start_game(socket_id: str, username: str):
     await dispatcher.dispatch_event(
         socket_io, SocketOperations.START_GAME.value, socket_id, username
     )
+
 
 def create_socket():
     return socket_io
