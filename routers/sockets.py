@@ -1,7 +1,7 @@
 import logging
 
 
-from services.health import Health
+from services.socket_health import Health
 from init.socket_init import socket_io
 from services.start_game import StartGame
 from enums.socket_operations import SocketOperations
