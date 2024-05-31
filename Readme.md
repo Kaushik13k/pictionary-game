@@ -11,19 +11,19 @@ This project is a Pictionary game implemented with Python and Docker. It's desig
 
 1. Clone the repository and navigate to the project directory.
 2. If not running in a container, create a Python virtual environment using the following command: `python3 -m pipenv shell`
-3. Run the app using Docker Compose: `docker-compose up`
-4. To shut down the app and remove all images, use: `docker-compose down --rmi all`
+3. Run the app using Docker Compose: `docker-compose up` or use command `make up`
+4. To shut down the app and remove all images, use: `docker-compose down --rmi all` or use command `make down`
 
 ## API Endpoints
 
 - Health check: `/v1/health`
-- Room operations: `/v1/rooms`
+- Room operations:
+  - Create Room: `/v1/create-room`
+  - Join Room: `/v1/join-room`
+  - Get Room: `/v1/get-rooms`
 
 ## Socket Events
 
-- Create room: `create_room`
-- Join room: `join_room`
-- Leave room: `leave_room`
 - Start game: `start_game`
 - End game: `end_game`
 - Start turn: `start_turn`
