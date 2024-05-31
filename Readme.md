@@ -21,7 +21,7 @@ This project is a Pictionary game implemented with Python and Docker. It's desig
 - Room operations:
   - Create Room: `/v1/create-room`
   - Join Room: `/v1/join-room`
-  - Get Room: `/v1/get-rooms`
+  - Fetch Room: `/v1/fetch-rooms`
 
 ## Socket Events
 
