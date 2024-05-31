@@ -12,7 +12,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-@router.get("/get-rooms", tags=["Rooms"], responses={404: {"description": "Not found"}})
+@router.get("/fetch-rooms", tags=["Rooms"], responses={404: {"description": "Not found"}})
 async def create_room(user_id: str = Header(None)):
     room_factory = FetchRooms(user_id)
     return await room_factory.handle_room()

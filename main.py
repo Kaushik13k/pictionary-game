@@ -7,7 +7,7 @@ from fastapi import FastAPI, Request
 from starlette.routing import Match
 import socketio
 
-from routers import create_room, get_rooms, join_room, health, sockets
+from routers import create_room, fetch_rooms, join_room, health, sockets
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -63,7 +63,7 @@ app.add_middleware(
 app.include_router(health.router, prefix="/v1")
 app.include_router(create_room.router, prefix="/v1")
 app.include_router(join_room.router, prefix="/v1")
-app.include_router(get_rooms.router, prefix="/v1")
+app.include_router(fetch_rooms.router, prefix="/v1")
 app.mount("/", socketio.ASGIApp(socket_io))
 
 if __name__ == "__main__":
