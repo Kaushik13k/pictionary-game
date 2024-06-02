@@ -4,6 +4,7 @@ import traceback
 from fastapi import APIRouter
 
 from init.redis_init import redis_init
+from init.socket_init import socket_io
 from services.room_events import RoomEvents
 from utils.api_response import success, error
 from enums.redis_operations import RedisOperations
@@ -40,8 +41,20 @@ class CreateRoom(RoomEvents):
             )
             if result.decode("utf-8") == "OK":
                 logger.info(f"Set data in Redis for key {redis_key}")
+                await socket_io.emit(
+                    "create_room",
+                    {
+                        "room_id": room_id,
+                        "mesasge": f"Room created successfully, {self.room_data.player_name} joined the room",
+                    },
+                    room=socket_link,
+                )
                 return success(
-                    {"room_id": room_id, "socket_link": socket_link},
+                    {
+                        "room_id": room_id,
+                        "socket_link": socket_link,
+                        "is_creator": True,
+                    },
                     message="Rooms fetched successfully",
                 )
 

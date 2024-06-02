@@ -1,8 +1,9 @@
 import logging
 from fastapi import APIRouter
 
-from models.create_room import CreateRoomModel
 from services.create_room import CreateRoom
+from models.create_room import CreateRoomModel
+
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
