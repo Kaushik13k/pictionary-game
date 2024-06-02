@@ -54,6 +54,7 @@ class CreateRoom(RoomEvents):
                         "room_id": room_id,
                         "socket_link": socket_link,
                         "is_creator": True,
+                        "player_id": user_data["members"][0]["player_id"],
                     },
                     message="Rooms fetched successfully",
                 )
