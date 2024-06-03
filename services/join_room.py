@@ -3,6 +3,7 @@ import logging
 import traceback
 
 from init.redis_init import redis_init
+from init.socket_init import socket_io
 from services.room_events import RoomEvents
 from enums.redis_operations import RedisOperations
 from exceptions.exceptions import JoinRoomException
@@ -61,6 +62,21 @@ class JoinRoom(RoomEvents):
                 )
                 logger.info(f"Updated room details in Redis for key {redis_key}")
                 socket_link = self.generate_socket_link(self.room_data.room_id)
+                # Emit 'joinedRoom' event to the player who just joined
+                await socket_io.emit(
+                    "joined_room",
+                    {"player_id": latest_player_id + 1},
+                    # room=room_id
+                )
+
+                # Emit 'playerJoined' event to all other players in the room
+                await socket_io.emit(
+                    "player_joined",
+                    {"player_id": latest_player_id + 1},
+                    # room=room_id,
+                    skip_sid=self.room_data.room_id,
+                )
+
                 return success(
                     {
                         "socket_link": socket_link,

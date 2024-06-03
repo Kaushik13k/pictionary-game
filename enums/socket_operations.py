@@ -1,6 +1,10 @@
 from enum import Enum
 
+
 class SocketOperations(Enum):
+    CONNECT = "connect"
+    DISCONNECT = "disconnect"
+
     HEALTH = "health"
     CREATE = "create_room"
     JOIN = "join_room"
@@ -14,4 +18,3 @@ class SocketOperations(Enum):
 
     START_ROUND = "start_round"
     END_ROUND = "end_round"
-    

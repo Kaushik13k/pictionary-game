@@ -2,6 +2,7 @@ from pydantic import BaseModel
 
 
 class CreateRoomModel(BaseModel):
+    sid: str
     rounds: int
     time: int
     player_name: str
