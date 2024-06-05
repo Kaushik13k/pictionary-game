@@ -77,14 +77,14 @@ class JoinRoom(RoomEvents):
                 socket_link = self.generate_socket_link(self.room_data.room_id)
                 # Emit 'joinedRoom' event to the player who just joined
                 await socket_io.emit(
-                    "joined_room",
+                    "lobby",
                     {"message": f"You have joined the room."},
                     room=self.room_data.sid,
                 )
 
                 # Emit 'playerJoined' event to all other players in the room
                 await socket_io.emit(
-                    "joined_room",
+                    "lobby",
                     {"message": f"{self.room_data.player_name} has joined the room."},
                     room=players_sids,
                     skip_sid=self.room_data.sid,

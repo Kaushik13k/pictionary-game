@@ -44,7 +44,7 @@ class CreateRoom(RoomEvents):
             if result.decode("utf-8") == "OK":
                 logger.info(f"Set data in Redis for key {redis_key}")
                 await socket_io.emit(
-                    "create_room",
+                    "lobby",
                     {
                         # "room_id": room_id,
                         "mesasge": f"Room created successfully, {self.room_data.player_name} joined the room",
