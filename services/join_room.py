@@ -17,13 +17,23 @@ class JoinRoom(RoomEvents):
     async def handle_room(self):
         try:
             logger.info(
-                f"Handling join_room event for socket_id and username {self.room_data.player_name}"
+                f"Handling join_room event for socket_id and username {self.room_data.player_name} and room_id {self.room_data.room_id}, sid {self.room_data.sid}"
             )
 
             redis_key = f"room_id_players:{self.room_data.room_id}"
             initial_arr_length = redis_init.execute_command(
                 RedisOperations.JSON_ARRAY_LENGTH.value, redis_key, ".members"
             )
+
+            members_json = redis_init.execute_command(
+                RedisOperations.JSON_GET.value,
+                redis_key,
+                ".members",
+            )
+            members = json.loads(members_json)
+            players_sids = [member["sid"] for member in members]
+            logger.info(f"Players sids: {players_sids}")
+
             latest_player_id = int(
                 (
                     redis_init.execute_command(
@@ -45,6 +55,8 @@ class JoinRoom(RoomEvents):
                         "is_active": True,
                         "player_name": self.room_data.player_name,
                         "score": 0,
+                        "is_creator": False,
+                        "sid": self.room_data.sid,
                     }
                 ),
             )
@@ -60,21 +72,22 @@ class JoinRoom(RoomEvents):
                         RedisOperations.JSON_GET.value, redis_key
                     )
                 )
+
                 logger.info(f"Updated room details in Redis for key {redis_key}")
                 socket_link = self.generate_socket_link(self.room_data.room_id)
                 # Emit 'joinedRoom' event to the player who just joined
                 await socket_io.emit(
                     "joined_room",
-                    {"player_id": latest_player_id + 1},
-                    # room=room_id
+                    {"message": f"You have joined the room."},
+                    room=self.room_data.sid,
                 )
 
                 # Emit 'playerJoined' event to all other players in the room
                 await socket_io.emit(
-                    "player_joined",
-                    {"player_id": latest_player_id + 1},
-                    # room=room_id,
-                    skip_sid=self.room_data.room_id,
+                    "joined_room",
+                    {"message": f"{self.room_data.player_name} has joined the room."},
+                    room=players_sids,
+                    skip_sid=self.room_data.sid,
                 )
 
                 return success(

@@ -45,7 +45,6 @@ async def connect(socket_id, message):
     await dispatcher.dispatch_event(
         socket_io, SocketOperations.CONNECT.value, socket_id, message
     )
-    # await sio.emit("connect", {"sid": sid}, room=sid)
 
 
 # @socket_io.on(SocketOperations.DISCONNECT.value)

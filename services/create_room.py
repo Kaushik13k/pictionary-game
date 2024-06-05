@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 class CreateRoom(RoomEvents):
     async def handle_room(self):
         try:
-            # room_id = self.generate_unique_room_id()
+            room_id = self.generate_unique_room_id()
             socket_link = self.generate_socket_link(self.room_data.sid)
 
             logger.info(
@@ -32,10 +32,12 @@ class CreateRoom(RoomEvents):
                         "is_active": True,
                         "player_name": self.room_data.player_name,
                         "score": 0,
+                        "is_creator": True,
+                        "sid": self.room_data.sid,
                     }
                 ],
             }
-            redis_key = f"room_id_players:{self.room_data.sid}"
+            redis_key = f"room_id_players:{room_id}"
             result = redis_init.execute_command(
                 RedisOperations.JSON_SET.value, redis_key, "$", json.dumps(user_data)
             )
@@ -44,14 +46,14 @@ class CreateRoom(RoomEvents):
                 await socket_io.emit(
                     "create_room",
                     {
-                        "room_id": self.room_data.sid,
+                        # "room_id": room_id,
                         "mesasge": f"Room created successfully, {self.room_data.player_name} joined the room",
                     },
                     room=self.room_data.sid,
                 )
                 return success(
                     {
-                        "room_id": self.room_data.sid,
+                        "room_id": room_id,
                         "socket_link": socket_link,
                         "is_creator": True,
                         "player_id": user_data["members"][0]["player_id"],
