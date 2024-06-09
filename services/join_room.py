@@ -9,6 +9,8 @@ from enums.redis_operations import RedisOperations
 from exceptions.exceptions import JoinRoomException
 from utils.api_response import success, error
 
+from routers.sockets import manager
+
 
 logger = logging.getLogger(__name__)
 
@@ -76,18 +78,25 @@ class JoinRoom(RoomEvents):
                 logger.info(f"Updated room details in Redis for key {redis_key}")
                 socket_link = self.generate_socket_link(self.room_data.room_id)
                 # Emit 'joinedRoom' event to the player who just joined
-                await socket_io.emit(
-                    "lobby",
-                    {"message": f"You have joined the room."},
-                    room=self.room_data.sid,
+                # await socket_io.emit(
+                #     "lobby",
+                #     {"message": f"You have joined the room."},
+                #     room=self.room_data.sid,
+                # )
+                await manager.activate_connection(self.room_data.sid)
+                await manager.send_personal_message(
+                    "Joined The Room", self.room_data.sid
                 )
-
                 # Emit 'playerJoined' event to all other players in the room
-                await socket_io.emit(
-                    "lobby",
-                    {"message": f"{self.room_data.player_name} has joined the room."},
-                    room=players_sids,
-                    skip_sid=self.room_data.sid,
+                # await socket_io.emit(
+                #     "lobby",
+                #     {"message": f"{self.room_data.player_name} has joined the room."},
+                #     room=players_sids,
+                #     skip_sid=self.room_data.sid,
+                # )
+                await manager.broadcast(
+                    f"{self.room_data.player_name} has joined the room.",
+                    self.room_data.sid,
                 )
 
                 return success(

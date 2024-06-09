@@ -1,72 +1,79 @@
+import json
+from starlette.websockets import WebSocket
+from fastapi import APIRouter, WebSocketDisconnect
+from datetime import datetime
 import logging
+from typing import Dict, Optional
 
-from init.socket_init import socket_io
-from services.socket_health import Health
-from services.start_game import StartGame
-from services.socket_connect import Connect
+
 from enums.socket_operations import SocketOperations
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+router = APIRouter()
 
-class SocketEventDispatcher:
+
+class ConnectionManager:
     def __init__(self):
-        self.events = {}
+        self.active_connections: Dict[str, WebSocket] = {}
 
-    def register_event(self, event_name: str, event: str):
-        if event_name not in self.events:
-            self.events[event_name] = event
-            logger.info(f"Event {event_name} registered.")
-        else:
-            logger.warning(f"Event {event_name} is already registered.")
+    async def connect(self, websocket: WebSocket, client_id: str):
+        await websocket.accept()
+        self.active_connections[client_id] = {
+            "socket_instance": websocket,
+            "connected": False,
+        }
 
-    async def dispatch_event(
-        self, sio: str, event_name: str, socket_id: str, message: str
-    ):
-        logger.info(
-            f"Dispatching event {event_name} for socket {socket_id} with data {message}"
-        )
-        event = self.events.get(event_name)
-        if event is not None:
-            await event.handle(sio, socket_id, message)
+        await websocket.send_text(f"{client_id}")
 
+    async def activate_connection(self, client_id: str):
+        self.active_connections[client_id]["connected"] = True
 
-dispatcher = SocketEventDispatcher()
-dispatcher.register_event(SocketOperations.HEALTH.value, Health())
-dispatcher.register_event(SocketOperations.CONNECT.value, Connect())
-dispatcher.register_event(SocketOperations.START_GAME.value, StartGame())
+    # async def disconnect(self, websocket: WebSocket):
+    #     self.active_connections.remove(websocket)
 
+    async def disconnect(self, client_id: str):
+        del self.active_connections[client_id]["socket_instance"]
 
-@socket_io.on(
-    SocketOperations.CONNECT.value,
-)
-async def connect(socket_id, message):
-    await dispatcher.dispatch_event(
-        socket_io, SocketOperations.CONNECT.value, socket_id, message
-    )
+    async def send_message(self, message: str, websocket: WebSocket):
+        await websocket.send_text(message)
 
+    async def health(self, websocket: WebSocket, message: str):
+        await websocket.send_text("Health check successful")
 
-# @socket_io.on(SocketOperations.DISCONNECT.value)
-# async def disconnect(socket_id, message):
-#     await dispatcher.dispatch_event(
-#         socket_io, SocketOperations.DISCONNECT.value, socket_id, message
-#     )
+    async def send_personal_message(self, message: str, client_id: str):
+        logger.info(f"Sending message to {client_id}")
+        logger.info(f"Active connections: {self.active_connections}")
+        await self.active_connections[client_id]["socket_instance"].send_text(message)
+
+    async def broadcast(self, message: str, exclude: Optional[str] = None):
+        for client_id, connection in self.active_connections.items():
+            if client_id != exclude and connection["connected"]:
+                await connection["socket_instance"].send_text(message)
 
 
-@socket_io.on(SocketOperations.HEALTH.value)
-async def health(socket_id: str, message: str):
-    await dispatcher.dispatch_event(
-        socket_io, SocketOperations.HEALTH.value, socket_id, message
-    )
+manager = ConnectionManager()
 
 
-@socket_io.on(SocketOperations.START_GAME.value)
-async def start_game(socket_id: str, message: str):
-    await dispatcher.dispatch_event(
-        socket_io, SocketOperations.START_GAME.value, socket_id, message
-    )
+@router.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket):
+    client_id = str(int((datetime.now()).timestamp()))
 
+    await manager.connect(websocket, client_id)
+    try:
+        while True:
+            data = await websocket.receive_text()
+            data_json = json.loads(data)
+            operation = data_json.get("operation")
 
-def create_socket():
-    return socket_io
+            if operation == SocketOperations.HEALTH.value:
+                await manager.health(websocket, data)
+            elif operation == "other_operation":
+                await manager.other_event(websocket, data)
+            else:
+                await websocket.send_text("Unknown operation")
+
+    except WebSocketDisconnect:
+        manager.disconnect(client_id)
+        await manager.broadcast(f"Client #{client_id} left the chat")

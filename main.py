@@ -29,7 +29,7 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-socket_io = sockets.create_socket()
+# socket_io = sockets.create_socket()
 
 
 @app.middleware("https")
@@ -64,7 +64,8 @@ app.include_router(create_room.router, prefix="/v1")
 app.include_router(join_room.router, prefix="/v1")
 app.include_router(fetch_rooms.router, prefix="/v1")
 app.include_router(fetch_players.router, prefix="/v1")
-app.mount("/", socketio.ASGIApp(socket_io))
+app.include_router(sockets.router, prefix="/v1")
+# app.mount("/", socketio.ASGIApp(socket_io))
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
