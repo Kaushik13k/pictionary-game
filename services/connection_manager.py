@@ -12,8 +12,10 @@ class ConnectionManager:
     def __new__(cls):
         if cls._instance is None:
             cls._instance = super(ConnectionManager, cls).__new__(cls)
-            cls._instance.active_connections: Dict[str, WebSocket] = {}
         return cls._instance
+
+    def __init__(self):
+        self.active_connections: Dict[str, WebSocket] = {}
 
     async def connect(self, websocket: WebSocket, client_id: str):
         await websocket.accept()
