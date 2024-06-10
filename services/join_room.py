@@ -76,24 +76,14 @@ class JoinRoom(RoomEvents):
                 )
 
                 logger.info(f"Updated room details in Redis for key {redis_key}")
-                socket_link = self.generate_socket_link(self.room_data.room_id)
+
                 # Emit 'joinedRoom' event to the player who just joined
-                # await socket_io.emit(
-                #     "lobby",
-                #     {"message": f"You have joined the room."},
-                #     room=self.room_data.sid,
-                # )
                 await manager.activate_connection(self.room_data.sid)
                 await manager.send_personal_message(
                     "Joined The Room", self.room_data.sid
                 )
+
                 # Emit 'playerJoined' event to all other players in the room
-                # await socket_io.emit(
-                #     "lobby",
-                #     {"message": f"{self.room_data.player_name} has joined the room."},
-                #     room=players_sids,
-                #     skip_sid=self.room_data.sid,
-                # )
                 await manager.broadcast(
                     f"{self.room_data.player_name} has joined the room.",
                     self.room_data.sid,
@@ -101,7 +91,6 @@ class JoinRoom(RoomEvents):
 
                 return success(
                     {
-                        "socket_link": socket_link,
                         "player_id": latest_player_id + 1,
                         "is_creator": False,
                     },

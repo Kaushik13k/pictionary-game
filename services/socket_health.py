@@ -1,6 +1,10 @@
 from services.socket_event import SocketEvent
+from starlette.websockets import WebSocket
 
 
-class Health(SocketEvent):
-    async def handle(self, sio: str, socket_id: str, message: str = None):
-        await sio.emit("health", "Alive", room=socket_id)
+class HealthCommand(SocketEvent):
+    def __init__(self, manager):
+        self.manager = manager
+
+    async def execute(self, websocket: WebSocket, data: str):
+        await self.manager.health(websocket, data)

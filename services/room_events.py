@@ -13,6 +13,3 @@ class RoomEvents(ABC):
 
     def generate_unique_room_id(self):
         return str(uuid.uuid4())
-
-    def generate_socket_link(self, room_id):
-        return f"ws://0.0.0.0:8000/{room_id}"
