@@ -44,7 +44,7 @@ class CreateRoom(RoomEvents):
 
                 await manager.activate_connection(self.room_data.sid)
                 await manager.send_personal_message(
-                    {"event": "create_room", "message": "Room created"},
+                    {"event": "create_room", "value": "Room created"},
                     self.room_data.sid,
                 )
                 return success(

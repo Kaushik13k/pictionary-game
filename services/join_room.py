@@ -80,7 +80,7 @@ class JoinRoom(RoomEvents):
                 # Emit 'joinedRoom' event to the player who just joined
                 await manager.activate_connection(self.room_data.sid)
                 await manager.send_personal_message(
-                    {"event": "join_room", "message": "Joined The Room"},
+                    {"event": "join_room", "value": "Joined The Room"},
                     self.room_data.sid,
                 )
 
@@ -88,7 +88,7 @@ class JoinRoom(RoomEvents):
                 await manager.broadcast(
                     {
                         "event": "join_room",
-                        "message": f"{self.room_data.player_name} has joined the room.",
+                        "value": f"{self.room_data.player_name} has joined the room.",
                     },
                     self.room_data.sid,
                 )

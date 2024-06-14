@@ -31,7 +31,7 @@ class ConnectionManager:
             "connected": False,
         }
 
-        await websocket.send_json({"event": "connect", "sid": client_id})
+        await websocket.send_json({"event": "connect", "value": client_id})
 
     async def activate_connection(self, client_id: str):
         self.active_connections[client_id]["connected"] = True
