@@ -38,6 +38,9 @@ class ConnectionManager:
     async def health(self, websocket: WebSocket, message: str):
         await websocket.send_text("Health check successful")
 
+    async def start_game(self, websocket: WebSocket, message: str):
+        await websocket.send_text("start_game check successful")
+
     async def send_personal_message(self, message: str, client_id: str):
         logger.info(f"Sending message to {client_id}")
         logger.info(f"Active connections: {self.active_connections}")

@@ -3,6 +3,7 @@ import logging
 from datetime import datetime
 from starlette.websockets import WebSocket
 from fastapi import APIRouter, WebSocketDisconnect
+from routers.start_game import StartCommand
 from services.connection_manager import ConnectionManager
 from enums.socket_operations import SocketOperations
 from routers.socket_health import HealthCommand
@@ -17,6 +18,7 @@ class CommandHandler:
     def __init__(self, manager: ConnectionManager):
         self.commands = {
             SocketOperations.HEALTH.value: HealthCommand(manager),
+            SocketOperations.START_GAME.value: StartCommand(manager),
         }
 
     def get_command(self, operation: str):
@@ -36,13 +38,13 @@ async def websocket_endpoint(websocket: WebSocket):
         while True:
             data = await websocket.receive_text()
             data_json = json.loads(data)
-            operation = data_json.get("operation")
+            event = data_json.get("event")
 
-            command = command_handler.get_command(operation)
+            command = command_handler.get_command(event)
             if command:
                 await command.execute(websocket, data)
             else:
-                await websocket.send_text("Unknown operation")
+                await websocket.send_text("Unknown event")
 
     except WebSocketDisconnect:
         manager.disconnect(client_id)
