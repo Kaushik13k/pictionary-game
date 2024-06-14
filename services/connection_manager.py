@@ -59,4 +59,4 @@ class ConnectionManager:
     async def broadcast(self, message: str, exclude: Optional[str] = None):
         for client_id, connection in self.active_connections.items():
             if client_id != exclude and connection["connected"]:
-                await connection["socket_instance"].send_text(message)
+                await connection["socket_instance"].send_json(message)
