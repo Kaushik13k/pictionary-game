@@ -31,3 +31,4 @@ This project is a Pictionary game implemented with Python and Docker. It's desig
   - Create Room: `/v1/create-room`
   - Join Room: `/v1/join-room`
   - Fetch Room: `/v1/fetch-rooms`
+  - Fetch Players: `/v1/fetch-players`
