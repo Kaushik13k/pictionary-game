@@ -18,6 +18,7 @@ This project is a Pictionary game implemented with Python and Docker. It's desig
 ## Run Tests
 
 - pytest tests/unit -s
+- OR `make test`
 
 ## Get code coverage
 
