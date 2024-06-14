@@ -43,7 +43,10 @@ class CreateRoom(RoomEvents):
                 logger.info(f"Set data in Redis for key {redis_key}")
 
                 await manager.activate_connection(self.room_data.sid)
-                await manager.send_personal_message("Room created", self.room_data.sid)
+                await manager.send_personal_message(
+                    {"event": "create_room", "message": "Room created"},
+                    self.room_data.sid,
+                )
                 return success(
                     {
                         "room_id": room_id,

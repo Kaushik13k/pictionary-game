@@ -31,7 +31,7 @@ class ConnectionManager:
             "connected": False,
         }
 
-        await websocket.send_text(f"{client_id}")
+        await websocket.send_json({"event": "connect", "sid": client_id})
 
     async def activate_connection(self, client_id: str):
         self.active_connections[client_id]["connected"] = True
@@ -43,7 +43,7 @@ class ConnectionManager:
         await websocket.send_text(message)
 
     async def health(self, websocket: WebSocket, message: str):
-        await websocket.send_text("Health check successful")
+        await websocket.send_json({"status": "Health check successful"})
 
     async def start_game(self, websocket: WebSocket, message: str, manager):
         logger.info(f"Start game-0: {message}")
@@ -54,7 +54,7 @@ class ConnectionManager:
     async def send_personal_message(self, message: str, client_id: str):
         logger.info(f"Sending message to {client_id}")
         logger.info(f"Active connections: {self.active_connections}")
-        await self.active_connections[client_id]["socket_instance"].send_text(message)
+        await self.active_connections[client_id]["socket_instance"].send_json(message)
 
     async def broadcast(self, message: str, exclude: Optional[str] = None):
         for client_id, connection in self.active_connections.items():
