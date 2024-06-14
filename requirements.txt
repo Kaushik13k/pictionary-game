@@ -9,6 +9,7 @@ blinker==1.8.2
 certifi==2024.2.2
 charset-normalizer==3.3.2
 click==8.1.7
+coverage==7.5.3
 dnspython==2.6.1
 email_validator==2.1.1
 exceptiongroup==1.2.1
@@ -38,6 +39,8 @@ pydantic==2.7.1
 pydantic_core==2.18.2
 Pygments==2.18.0
 pytest==8.2.1
+pytest-asyncio==0.23.7
+pytest-cov==5.0.0
 python-dotenv==1.0.1
 python-engineio==4.9.1
 python-multipart==0.0.9

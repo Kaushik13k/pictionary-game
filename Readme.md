@@ -15,6 +15,14 @@ This project is a Pictionary game implemented with Python and Docker. It's desig
 4. To shut down the app and remove all images, use: `docker-compose down --rmi all` or use command `make down`
 5. OR just do `make all`
 
+## Run Tests
+
+- pytest tests/unit -s
+
+## Get code coverage
+
+- pytest --cov=./ tests/
+
 ## API Endpoints
 
 - Health check: `/v1/health`
@@ -22,12 +30,3 @@ This project is a Pictionary game implemented with Python and Docker. It's desig
   - Create Room: `/v1/create-room`
   - Join Room: `/v1/join-room`
   - Fetch Room: `/v1/fetch-rooms`
-
-## Socket Events
-
-- Start game: `start_game`
-- End game: `end_game`
-- Start turn: `start_turn`
-- End turn: `end_turn`
-- Start round: `start_round`
-- End round: `end_round`
