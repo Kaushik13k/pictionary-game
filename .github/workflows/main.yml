@@ -37,6 +37,9 @@ jobs:
           echo "ls is:"
           ls
 
+      - name: Set PYTHONPATH
+        run: echo "PYTHONPATH=$(pwd)" >> $GITHUB_ENV
+
       - name: Install dependenciaes
         run: |
           python -m pip install -r requirements.txt
