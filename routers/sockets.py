@@ -1,72 +1,49 @@
+import json
 import logging
-
-
-from services.health import Health
-from init.socket_init import socket_io
-from services.join_room import JoinRoom
-from services.create_room import CreateRoom
-from services.start_game import StartGame
+from datetime import datetime
+from starlette.websockets import WebSocket
+from fastapi import APIRouter, WebSocketDisconnect
+from services.connection_manager import ConnectionManager
 from enums.socket_operations import SocketOperations
+from services.socket_health import HealthCommand
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-
-class SocketEventDispatcher:
-    def __init__(self):
-        self.events = {}
-
-    def register_event(self, event_name: str, event: str):
-        if event_name not in self.events:
-            self.events[event_name] = event
-            logger.info(f"Event {event_name} registered.")
-        else:
-            logger.warning(f"Event {event_name} is already registered.")
-
-    async def dispatch_event(
-        self, sio: str, event_name: str, socket_id: str, data: str
-    ):
-        logger.info(
-            f"Dispatching event {event_name} for socket {socket_id} with data {data}"
-        )
-        event = self.events.get(event_name)
-        if event is not None:
-            await event.handle(sio, socket_id, data)
+router = APIRouter()
 
 
-dispatcher = SocketEventDispatcher()
-dispatcher.register_event(SocketOperations.HEALTH.value, Health())
-dispatcher.register_event(SocketOperations.CREATE.value, CreateRoom())
-dispatcher.register_event(SocketOperations.JOIN.value, JoinRoom())
-dispatcher.register_event(SocketOperations.START_GAME.value, StartGame())
+class CommandHandler:
+    def __init__(self, manager: ConnectionManager):
+        self.commands = {
+            SocketOperations.HEALTH.value: HealthCommand(manager),
+        }
+
+    def get_command(self, operation: str):
+        return self.commands.get(operation)
 
 
-@socket_io.on(SocketOperations.HEALTH.value)
-async def health(socket_id: str, data: str):
-    await dispatcher.dispatch_event(
-        socket_io, SocketOperations.HEALTH.value, socket_id, data
-    )
+manager = ConnectionManager()
+command_handler = CommandHandler(manager)
 
 
-@socket_io.on(SocketOperations.CREATE.value)
-async def create_room(socket_id: str, username: str):
-    await dispatcher.dispatch_event(
-        socket_io, SocketOperations.CREATE.value, socket_id, username
-    )
+@router.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket):
+    client_id = str(int((datetime.now()).timestamp()))
 
+    await manager.connect(websocket, client_id)
+    try:
+        while True:
+            data = await websocket.receive_text()
+            data_json = json.loads(data)
+            operation = data_json.get("operation")
 
-@socket_io.on(SocketOperations.JOIN.value)
-async def join_room(socket_id: str, username: str):
-    await dispatcher.dispatch_event(
-        socket_io, SocketOperations.JOIN.value, socket_id, username
-    )
+            command = command_handler.get_command(operation)
+            if command:
+                await command.execute(websocket, data)
+            else:
+                await websocket.send_text("Unknown operation")
 
-
-@socket_io.on(SocketOperations.START_GAME.value)
-async def start_game(socket_id: str, username: str):
-    await dispatcher.dispatch_event(
-        socket_io, SocketOperations.START_GAME.value, socket_id, username
-    )
-
-def create_socket():
-    return socket_io
+    except WebSocketDisconnect:
+        manager.disconnect(client_id)
+        await manager.broadcast(f"Client #{client_id} left the chat")

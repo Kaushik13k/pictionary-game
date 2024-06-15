@@ -1,13 +1,12 @@
 import logging
 import uvicorn
-
+import socketio
+from starlette.routing import Match
+from fastapi import FastAPI, Request
 from contextlib import asynccontextmanager
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi import FastAPI, Request
-from starlette.routing import Match
-import socketio
 
-from routers import health, sockets, rooms
+from routers import create_room, fetch_rooms, join_room, health, sockets, fetch_players
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -29,8 +28,6 @@ app = FastAPI(
     debug=True,
     lifespan=lifespan,
 )
-
-socket_io = sockets.create_socket()
 
 
 @app.middleware("https")
@@ -61,8 +58,11 @@ app.add_middleware(
 )
 
 app.include_router(health.router, prefix="/v1")
-app.include_router(rooms.router, prefix="/v1")
-app.mount("/", socketio.ASGIApp(socket_io))
+app.include_router(create_room.router, prefix="/v1")
+app.include_router(join_room.router, prefix="/v1")
+app.include_router(fetch_rooms.router, prefix="/v1")
+app.include_router(fetch_players.router, prefix="/v1")
+app.include_router(sockets.router, prefix="/v1")
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
