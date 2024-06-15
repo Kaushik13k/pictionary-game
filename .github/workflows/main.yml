@@ -2,7 +2,7 @@ name: CI/CD
 
 on:
   push:
-    branches: [feat/create_join_room]
+    branches: [main]
     paths:
       - "main.py"
       - "tests/"
