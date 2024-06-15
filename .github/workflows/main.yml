@@ -29,13 +29,13 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: 3.8
-        
+
       - name: Print working directory
-          run: |
-            echo "pwd is:"
-            pwd
-            echo "ls is:"
-            ls
+        run: |
+          echo "pwd is:"
+          pwd
+          echo "ls is:"
+          ls
 
       - name: Install dependenciaes
         run: |
