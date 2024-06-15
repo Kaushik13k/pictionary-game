@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 
 @router.post(
-    "/create-room", tags=["Heath"], responses={404: {"description": "Not found"}}
+    "/create-room", tags=["Create Room"], responses={404: {"description": "Not found"}}
 )
 async def create_room(room: CreateRoomModel):
     room_factory = CreateRoom(room)

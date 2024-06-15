@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 
 @router.post(
-    "/fetch-players", tags=["Heath"], responses={404: {"description": "Not found"}}
+    "/fetch-players", tags=["Fetch Players"], responses={404: {"description": "Not found"}}
 )
 async def fetch_room(room: FetchPlayersModel):
     room_factory = FetchPlayers(room)

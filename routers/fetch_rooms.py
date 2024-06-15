@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 @router.get(
-    "/fetch-rooms", tags=["Rooms"], responses={404: {"description": "Not found"}}
+    "/fetch-rooms", tags=["Fetch Rooms"], responses={404: {"description": "Not found"}}
 )
 async def create_room(user_id: str = Header(None)):
     room_factory = FetchRooms(user_id)
