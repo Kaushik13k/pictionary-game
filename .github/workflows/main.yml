@@ -36,5 +36,6 @@ jobs:
 
       - name: Run tests
         run: |
+          python -c "import os; print(os.listdir())"
           echo "Testing the Python Code!"
           pytest -v tests
