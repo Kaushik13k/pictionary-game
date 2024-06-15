@@ -2,11 +2,9 @@ name: CI/CD
 
 on:
   push:
-    branches: [main]
-    paths:
-      - "main.py"
-      - "tests/"
-      - "requirements.txt"
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
 
 jobs:
   build:
