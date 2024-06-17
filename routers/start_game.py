@@ -7,4 +7,4 @@ class StartCommand(SocketEvent):
         self.manager = manager
 
     async def execute(self, websocket: WebSocket, data: str):
-        await self.manager.start_game(websocket, data)
+        await self.manager.start_game(websocket, data, self.manager)

@@ -2,8 +2,15 @@ from starlette.websockets import WebSocket
 from typing import Dict, Optional
 import logging
 
+from services.start_game import StartGame
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+
+class ConcreteStartGame(StartGame):
+    async def execute(self, *args, **kwargs):
+        pass
 
 
 class ConnectionManager:
@@ -38,7 +45,10 @@ class ConnectionManager:
     async def health(self, websocket: WebSocket, message: str):
         await websocket.send_text("Health check successful")
 
-    async def start_game(self, websocket: WebSocket, message: str):
+    async def start_game(self, websocket: WebSocket, message: str, manager):
+        logger.info(f"Start game-0: {message}")
+        start_game_instance = ConcreteStartGame()
+        await self.start_game_instance.handle(message, manager)
         await websocket.send_text("start_game check successful")
 
     async def send_personal_message(self, message: str, client_id: str):
