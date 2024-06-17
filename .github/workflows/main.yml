@@ -30,13 +30,6 @@ jobs:
         with:
           python-version: 3.8
 
-      - name: Print working directory
-        run: |
-          echo "pwd is:"
-          pwd
-          echo "ls is:"
-          ls
-
       - name: Set PYTHONPATH
         run: echo "PYTHONPATH=$(pwd)" >> $GITHUB_ENV
 
@@ -46,6 +39,5 @@ jobs:
 
       - name: Run tests
         run: |
-          python -c "import os; print(os.listdir())"
           echo "Testing the Python Code!"
           pytest -v tests
