@@ -59,17 +59,19 @@ class StartGame(SocketEvent):
             # )
             # logger.info(f"latest_player_id: {latest_player_lst}")
             # # --------------------------- WORDS LOGIC ---------------------------
-            await manager.send_personal_message("Choose a word", drawer["sid"])
+            await manager.send_personal_message(
+                {"event": "turn", "message": "Choose a word"}, drawer["sid"]
+            )
 
             await manager.broadcast(
-                f"{drawer['player_name']} is choosing.",
+                {"event": "turn", "message": f"{drawer['player_name']} is choosing."},
                 drawer["sid"],
             )
 
             await asyncio.sleep(GUESS_TIME)
 
             await manager.broadcast(
-                f"Time's up.",
+                {"event": "turn", "message": f"Time's up."},
             )
 
             game["turns"] = game.get("turns", 0) + 1
@@ -94,12 +96,16 @@ class StartGame(SocketEvent):
             game = {}
             if game.get("rounds") is None:
                 game["rounds"] = 1
-            await manager.broadcast(f"Round {game['rounds']} Starts.")
+            await manager.broadcast(
+                {"event": "round", "message": f"Round {game['rounds']} Starts."}
+            )
             self.set_game_data(game_key, game)
         else:
             game = json.loads(game)
             if game["turns"] == 0:
-                await manager.broadcast(f"Round {game['rounds']} Starts.")
+                await manager.broadcast(
+                    {"event": "round", "message": f"Round {game['rounds']} Starts."}
+                )
         return game
 
     def set_game_data(self, game_key, game):
@@ -121,7 +127,10 @@ class StartGame(SocketEvent):
         logger.info(f"Set data in Redis for key {redis_key}")
 
     async def end_round(self, game, game_key, manager):
-        await manager.broadcast(f"Round {game['rounds']} ends.")
+
+        await manager.broadcast(
+            {"event": "round", "message": f"Round {game['rounds']} ends."}
+        )
         redis_init.execute_command(
             RedisOperations.JSON_NUMBER_INCR_BY.value, game_key, "$.rounds", 1
         )
