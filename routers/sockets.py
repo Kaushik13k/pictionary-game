@@ -5,7 +5,7 @@ from starlette.websockets import WebSocket
 from fastapi import APIRouter, WebSocketDisconnect
 from services.connection_manager import ConnectionManager
 from enums.socket_operations import SocketOperations
-from services.socket_health import HealthCommand
+from routers.socket_health import HealthCommand
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
