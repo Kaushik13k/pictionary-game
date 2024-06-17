@@ -43,7 +43,9 @@ class ConnectionManager:
         await websocket.send_text(message)
 
     async def health(self, websocket: WebSocket, message: str):
-        await websocket.send_json({"status": "Health check successful"})
+        await websocket.send_json(
+            {"event": "health", "value": "Health check successful"}
+        )
 
     async def start_game(self, websocket: WebSocket, message: str, manager):
         logger.info(f"Start game-0: {message}")

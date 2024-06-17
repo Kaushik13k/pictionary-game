@@ -60,13 +60,13 @@ class StartGame(SocketEvent):
             # logger.info(f"latest_player_id: {latest_player_lst}")
             # # --------------------------- WORDS LOGIC ---------------------------
             await manager.send_personal_message(
-                {"event": "select_word", "message": "Choose a word"}, drawer["sid"]
+                {"event": "select_word", "value": "Choose a word"}, drawer["sid"]
             )
 
             await manager.broadcast(
                 {
                     "event": "choosing_word",
-                    "message": f"{drawer['player_name']} is choosing.",
+                    "value": f"{drawer['player_name']} is choosing.",
                 },
                 drawer["sid"],
             )
@@ -74,7 +74,7 @@ class StartGame(SocketEvent):
             await asyncio.sleep(GUESS_TIME)
 
             await manager.broadcast(
-                {"event": "time_up", "message": f"Time's up."},
+                {"event": "time_up", "value": f"Time's up."},
             )
 
             game["turns"] = game.get("turns", 0) + 1
@@ -100,7 +100,7 @@ class StartGame(SocketEvent):
             if game.get("rounds") is None:
                 game["rounds"] = 1
             await manager.broadcast(
-                {"event": "round_begin", "message": f"Round {game['rounds']} Starts."}
+                {"event": "round_begin", "value": f"Round {game['rounds']} Starts."}
             )
             self.set_game_data(game_key, game)
         else:
@@ -109,7 +109,7 @@ class StartGame(SocketEvent):
                 await manager.broadcast(
                     {
                         "event": "round_begin",
-                        "message": f"Round {game['rounds']} Starts.",
+                        "value": f"Round {game['rounds']} Starts.",
                     }
                 )
         return game
@@ -135,7 +135,7 @@ class StartGame(SocketEvent):
     async def end_round(self, game, game_key, manager):
 
         await manager.broadcast(
-            {"event": "round_end", "message": f"Round {game['rounds']} ends."}
+            {"event": "round_end", "value": f"Round {game['rounds']} ends."}
         )
         redis_init.execute_command(
             RedisOperations.JSON_NUMBER_INCR_BY.value, game_key, "$.rounds", 1
