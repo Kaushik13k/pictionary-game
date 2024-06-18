@@ -20,9 +20,9 @@ GUESS_TIME = 10
 
 
 class StartGame(SocketEvent):
-    async def handle(self, message, manager):
+    async def handle(self, message, manager, words_assign=True):
         try:
-            logger.info(f"StartGame-1: {message}")
+            logger.info(f"StartGame...")
             room_id = json.loads(message)["message"]["room_id"]
             redis_key = f"room_id_players:{room_id}"
             game_key = f"room_id_game:{room_id}"
@@ -32,35 +32,43 @@ class StartGame(SocketEvent):
 
             players = user["members"]
             logger.info(f"Players: {players}")
+            # drawer = players[0]
+
             # # --------------------------- WORDS LOGIC ---------------------------
-            # words = await assign_words(
-            #     num_rounds=3, num_players=len(players), words_per_round=2
-            # )
+            if words_assign:
+                words = await assign_words(
+                    num_rounds=3, num_players=len(players), words_per_round=2
+                )
 
-            # logger.info(f"Words assigned: {words}")
+                logger.info(f"Words assigned: {words}")
+                logger.info(f"Players: {players}")
+
+                for i, values in words.items():
+                    print(f"values: {values}, i: {i}")
+                    latest_player_id = redis_init.execute_command(
+                        "JSON.SET",
+                        redis_key,
+                        f"$.members[{i-1}].words",
+                        json.dumps(values),
+                    )
+
+                latest_player_lst = redis_init.execute_command(
+                    RedisOperations.JSON_GET.value,
+                    redis_key,
+                    f".members",
+                )
+
+            user = self.get_user_data(redis_key)
+            players = user["members"]
             drawer = players[0]
-            logger.info(f"Starting game for room {room_id} with drawer {drawer}")
-
-            # logger.info(f"Players: {players}")
-            # logger.info(f"type Players: {type(players)}")
-
-            # for i, values in words.items():
-            #     latest_player_id = redis_init.execute_command(
-            #         "JSON.SET",
-            #         redis_key,
-            #         f"$.members[{i}].words",
-            #         json.dumps(values),
-            #     )
-
-            # latest_player_lst = redis_init.execute_command(
-            #     RedisOperations.JSON_GET.value,
-            #     redis_key,
-            #     f".members",
-            # )
-            # logger.info(f"latest_player_id: {latest_player_lst}")
+            logger.info(f"drawer: {drawer}")
             # # --------------------------- WORDS LOGIC ---------------------------
             await manager.send_personal_message(
-                {"event": "select_word", "value": "Choose a word"}, drawer["sid"]
+                {
+                    "event": "select_word",
+                    "value": f"Choose a word, {drawer['words'][0]}",
+                },
+                drawer["sid"],
             )
 
             await manager.broadcast(
@@ -72,6 +80,13 @@ class StartGame(SocketEvent):
             )
 
             await asyncio.sleep(GUESS_TIME)
+
+            redis_init.execute_command(
+                "JSON.ARRPOP",
+                redis_key,
+                f"$.members[0].words",
+                0
+            )
 
             await manager.broadcast(
                 {"event": "time_up", "value": f"Time's up."},
@@ -87,7 +102,7 @@ class StartGame(SocketEvent):
             logger.info(f"New player order: {players}")
             self.set_user_data(redis_key, user)
 
-            await self.handle(message=message, manager=manager)
+            await self.handle(message=message, manager=manager, words_assign=False)
 
         except Exception as e:
             logger.error(e)
