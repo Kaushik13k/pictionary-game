@@ -20,90 +20,97 @@ GUESS_TIME = 10
 
 
 class StartGame(SocketEvent):
-    async def handle(self, message, manager, words_assign=True):
+    async def handle(self, message, manager, words_assign=True, current_round=1):
         try:
-            logger.info(f"StartGame...")
-            room_id = json.loads(message)["message"]["room_id"]
-            redis_key = f"room_id_players:{room_id}"
-            game_key = f"room_id_game:{room_id}"
+            if current_round <= 3:
+                logger.info(f"StartGame...")
+                room_id = json.loads(message)["message"]["room_id"]
+                redis_key = f"room_id_players:{room_id}"
+                game_key = f"room_id_game:{room_id}"
 
-            game = await self.get_game_data(game_key, manager)
-            user = self.get_user_data(redis_key)
+                game = await self.get_game_data(game_key, manager)
+                user = self.get_user_data(redis_key)
 
-            players = user["members"]
-            logger.info(f"Players: {players}")
-            # drawer = players[0]
-
-            # # --------------------------- WORDS LOGIC ---------------------------
-            if words_assign:
-                words = await assign_words(
-                    num_rounds=3, num_players=len(players), words_per_round=2
-                )
-
-                logger.info(f"Words assigned: {words}")
+                players = user["members"]
                 logger.info(f"Players: {players}")
+                # drawer = players[0]
 
-                for i, values in words.items():
-                    print(f"values: {values}, i: {i}")
-                    latest_player_id = redis_init.execute_command(
-                        "JSON.SET",
-                        redis_key,
-                        f"$.members[{i-1}].words",
-                        json.dumps(values),
+                # # --------------------------- WORDS LOGIC ---------------------------
+                if words_assign:
+                    words = await assign_words(
+                        num_rounds=3, num_players=len(players), words_per_round=2
                     )
 
-                latest_player_lst = redis_init.execute_command(
-                    RedisOperations.JSON_GET.value,
-                    redis_key,
-                    f".members",
+                    logger.info(f"Words assigned: {words}")
+                    logger.info(f"Players: {players}")
+
+                    for i, values in words.items():
+                        print(f"values: {values}, i: {i}")
+                        latest_player_id = redis_init.execute_command(
+                            "JSON.SET",
+                            redis_key,
+                            f"$.members[{i-1}].words",
+                            json.dumps(values),
+                        )
+
+                    latest_player_lst = redis_init.execute_command(
+                        RedisOperations.JSON_GET.value,
+                        redis_key,
+                        f".members",
+                    )
+
+                user = self.get_user_data(redis_key)
+                players = user["members"]
+                drawer = players[0]
+                logger.info(f"drawer: {drawer}")
+                # # --------------------------- WORDS LOGIC ---------------------------
+                await manager.send_personal_message(
+                    {
+                        "event": "select_word",
+                        "value": f"Choose a word, {drawer['words'][current_round-1]}",
+                    },
+                    drawer["sid"],
                 )
 
-            user = self.get_user_data(redis_key)
-            players = user["members"]
-            drawer = players[0]
-            logger.info(f"drawer: {drawer}")
-            # # --------------------------- WORDS LOGIC ---------------------------
-            await manager.send_personal_message(
-                {
-                    "event": "select_word",
-                    "value": f"Choose a word, {drawer['words'][0]}",
-                },
-                drawer["sid"],
-            )
+                await manager.broadcast(
+                    {
+                        "event": "choosing_word",
+                        "value": f"{drawer['player_name']} is choosing.",
+                    },
+                    drawer["sid"],
+                )
 
-            await manager.broadcast(
-                {
-                    "event": "choosing_word",
-                    "value": f"{drawer['player_name']} is choosing.",
-                },
-                drawer["sid"],
-            )
+                await asyncio.sleep(GUESS_TIME)
 
-            await asyncio.sleep(GUESS_TIME)
+                # redis_init.execute_command(
+                #     "JSON.DEL", redis_key, f"$.members[0].words", 0
+                # )
 
-            redis_init.execute_command(
-                "JSON.ARRPOP",
-                redis_key,
-                f"$.members[0].words",
-                0
-            )
+                await manager.broadcast(
+                    {"event": "time_up", "value": f"Time's up."},
+                )
 
-            await manager.broadcast(
-                {"event": "time_up", "value": f"Time's up."},
-            )
+                game["turns"] = game.get("turns", 0) + 1
+                self.set_game_data(game_key, game)
 
-            game["turns"] = game.get("turns", 0) + 1
-            self.set_game_data(game_key, game)
+                if game["turns"] >= len(players):
+                    await self.end_round(game, game_key, manager)
 
-            if game["turns"] >= len(players):
-                await self.end_round(game, game_key, manager)
+                user["members"] = players[1:] + players[:1]
+                logger.info(f"New player order: {players}")
+                self.set_user_data(redis_key, user)
+                current_round += 1
 
-            user["members"] = players[1:] + players[:1]
-            logger.info(f"New player order: {players}")
-            self.set_user_data(redis_key, user)
-
-            await self.handle(message=message, manager=manager, words_assign=False)
-
+                await self.handle(
+                    message=message,
+                    manager=manager,
+                    words_assign=False,
+                    current_round=current_round,
+                )
+            else:
+                await manager.broadcast(
+                    {"event": "end_game", "value": f"Game endded!"},
+                )
         except Exception as e:
             logger.error(e)
 
