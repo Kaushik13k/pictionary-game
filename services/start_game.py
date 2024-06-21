@@ -22,17 +22,17 @@ GUESS_TIME = 10
 class StartGame(SocketEvent):
     async def handle(self, message, manager, words_assign=True, current_round=1):
         try:
-            if current_round <= 3:
-                logger.info(f"StartGame...")
-                room_id = json.loads(message)["message"]["room_id"]
-                redis_key = f"room_id_players:{room_id}"
-                game_key = f"room_id_game:{room_id}"
+            logger.info(f"StartGame...")
+            room_id = json.loads(message)["message"]["room_id"]
+            redis_key = f"room_id_players:{room_id}"
+            game_key = f"room_id_game:{room_id}"
 
-                game = await self.get_game_data(game_key, manager)
-                user = self.get_user_data(redis_key)
+            game = await self.get_game_data(game_key, manager)
+            user = self.get_user_data(redis_key)
 
-                players = user["members"]
-                logger.info(f"Players: {players}")
+            players = user["members"]
+            logger.info(f"Players: {players}")
+            if current_round <= 3 * len(players):
                 # drawer = players[0]
 
                 # # --------------------------- WORDS LOGIC ---------------------------
