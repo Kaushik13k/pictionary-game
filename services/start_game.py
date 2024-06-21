@@ -16,7 +16,7 @@ from services.words_assignment import assign_words
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-GUESS_TIME = 10
+GUESS_TIME = 90
 
 
 class StartGame(SocketEvent):
