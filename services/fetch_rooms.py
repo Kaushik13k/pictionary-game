@@ -2,8 +2,8 @@ import logging
 import traceback
 from fastapi import APIRouter
 
-from init.redis_init import redis_init
 from services.room_events import RoomEvents
+from utils.get_room_ids import get_room_ids
 from utils.api_response import success, error
 
 
@@ -15,11 +15,7 @@ class FetchRooms(RoomEvents):
     async def handle_room(self):
         try:
             logger.info("Fetching rooms..")
-            redis_keys = redis_init.keys("*")
-            rooms = []
-            for key in redis_keys:
-                room_id = (key.decode()).split("room_id_players:")[1]
-                rooms.append(room_id)
+            rooms = get_room_ids()
             return success(rooms, message="Rooms fetched successfully")
         except Exception as e:
             logger.error(f"There was error fetching rooms: {e}")

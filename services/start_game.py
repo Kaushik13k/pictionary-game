@@ -67,7 +67,7 @@ class StartGame(SocketEvent):
                 await manager.send_personal_message(
                     {
                         "event": "select_word",
-                        "value": f"Choose a word, {drawer['words'][current_round-1]}",
+                        "value": drawer["words"][current_round - 1],
                     },
                     drawer["sid"],
                 )

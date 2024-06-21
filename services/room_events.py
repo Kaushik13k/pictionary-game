@@ -2,6 +2,8 @@ import uuid
 from pydantic import BaseModel
 from abc import ABC, abstractmethod
 
+from utils.get_room_ids import get_room_ids
+
 
 class RoomEvents(ABC):
     def __init__(self, room_data: BaseModel):
@@ -12,4 +14,8 @@ class RoomEvents(ABC):
         pass
 
     def generate_unique_room_id(self):
-        return str(uuid.uuid4())
+        while True:
+            room_id = str(uuid.uuid4())
+            existing_ids = get_room_ids()
+            if room_id not in existing_ids:
+                return room_id
