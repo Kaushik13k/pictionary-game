@@ -1,15 +1,11 @@
 import json
+import asyncio
 import logging
 import traceback
 
 from init.redis_init import redis_init
 from services.socket_event import SocketEvent
-
 from enums.redis_operations import RedisOperations
-from enums.socket_operations import SocketOperations
-import asyncio
-
-
 from services.words_assignment import assign_words
 
 
@@ -33,9 +29,6 @@ class StartGame(SocketEvent):
             players = user["members"]
             logger.info(f"Players: {players}")
             if current_round <= 3 * len(players):
-                # drawer = players[0]
-
-                # # --------------------------- WORDS LOGIC ---------------------------
                 if words_assign:
                     words = await assign_words(
                         num_rounds=3, num_players=len(players), words_per_round=2
@@ -53,17 +46,10 @@ class StartGame(SocketEvent):
                             json.dumps(values),
                         )
 
-                    latest_player_lst = redis_init.execute_command(
-                        RedisOperations.JSON_GET.value,
-                        redis_key,
-                        f".members",
-                    )
-
                 user = self.get_user_data(redis_key)
                 players = user["members"]
                 drawer = players[0]
                 logger.info(f"drawer: {drawer}")
-                # # --------------------------- WORDS LOGIC ---------------------------
                 await manager.send_personal_message(
                     {
                         "event": "select_word",
@@ -81,10 +67,6 @@ class StartGame(SocketEvent):
                 )
 
                 await asyncio.sleep(GUESS_TIME)
-
-                # redis_init.execute_command(
-                #     "JSON.DEL", redis_key, f"$.members[0].words", 0
-                # )
 
                 await manager.broadcast(
                     {"event": "time_up", "value": f"Time's up."},
