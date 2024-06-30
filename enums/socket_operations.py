@@ -11,6 +11,7 @@ class SocketOperations(Enum):
     LEAVE = "leave_room"
 
     START_GAME = "start_game"
+    SELECTED_WORD = "selected_word"
     END_GAME = "end_game"
 
     START_TURN = "start_turn"

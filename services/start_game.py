@@ -12,7 +12,8 @@ from services.words_assignment import assign_words
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-GUESS_TIME = 90
+GUESS_TIME = 70
+SELECTION_TIME = 20
 
 
 class StartGame(SocketEvent):
@@ -48,6 +49,10 @@ class StartGame(SocketEvent):
 
                 user = self.get_user_data(redis_key)
                 players = user["members"]
+                game["word_list"] = players
+                result_game = redis_init.execute_command(
+                    RedisOperations.JSON_SET.value, game_key, "$", json.dumps(game)
+                )
                 drawer = players[0]
                 logger.info(f"drawer: {drawer}")
                 await manager.send_personal_message(
@@ -65,8 +70,7 @@ class StartGame(SocketEvent):
                     },
                     drawer["sid"],
                 )
-
-                await asyncio.sleep(GUESS_TIME)
+                await asyncio.sleep(SELECTION_TIME + GUESS_TIME)
 
                 await manager.broadcast(
                     {"event": "time_up", "value": f"Time's up."},
@@ -117,6 +121,27 @@ class StartGame(SocketEvent):
                     }
                 )
         return game
+
+    # async def get_game_data(self, game_key, manager):
+    #     game_data = redis_init.execute_command(RedisOperations.JSON_GET.value, game_key)
+    #     logger.info(f"Game data: {game_data}")
+
+    #     # Ensure game is always a dictionary
+    #     game = {} if game_data is None else json.loads(game_data)
+
+    #     # Initialize rounds if not present
+    #     if "rounds" not in game:
+    #         game["rounds"] = 1
+
+    #     # Determine if a new round should start
+    #     if game.get("turns") == 0 or "turns" not in game:
+    #         await manager.broadcast(
+    #             {"event": "round_begin", "value": f"Round {game['rounds']} Starts."}
+    #         )
+    #         if game_data is None:  # Only set game data if it was initially None
+    #             self.set_game_data(game_key, game)
+
+    #     return game
 
     def set_game_data(self, game_key, game):
         result_game = redis_init.execute_command(
