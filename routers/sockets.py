@@ -1,9 +1,11 @@
 import json
+import asyncio
 import logging
 from datetime import datetime
 from starlette.websockets import WebSocket
 from fastapi import APIRouter, WebSocketDisconnect
 from routers.start_game import StartCommand
+from routers.selected_word import SelectedWordCommand
 from services.connection_manager import ConnectionManager
 from enums.socket_operations import SocketOperations
 from routers.socket_health import HealthCommand
@@ -19,6 +21,7 @@ class CommandHandler:
         self.commands = {
             SocketOperations.HEALTH.value: HealthCommand(manager),
             SocketOperations.START_GAME.value: StartCommand(manager),
+            SocketOperations.SELECTED_WORD.value: SelectedWordCommand(manager),
         }
 
     def get_command(self, operation: str):
@@ -42,7 +45,8 @@ async def websocket_endpoint(websocket: WebSocket):
 
             command = command_handler.get_command(event)
             if command:
-                await command.execute(websocket, data)
+                asyncio.create_task(command.execute(websocket, data))
+                # await command.execute(websocket, data)
             else:
                 await websocket.send_text("Unknown event")
 

@@ -3,12 +3,18 @@ from typing import Dict, Optional
 import logging
 
 from services.start_game import StartGame
+from services.selected_word import SelectedWord
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
 class ConcreteStartGame(StartGame):
+    async def execute(self, *args, **kwargs):
+        pass
+
+
+class ConcreteSelectedWord(SelectedWord):
     async def execute(self, *args, **kwargs):
         pass
 
@@ -54,6 +60,11 @@ class ConnectionManager:
             message, manager, words_assign=True, current_round=1
         )
         await websocket.send_text("start_game check successful")
+
+    async def selected_word(self, websocket: WebSocket, message: str, manager):
+        logger.info(f"select word: {message}")
+        selected_word_instance = ConcreteSelectedWord()
+        await selected_word_instance.handle(message, manager)
 
     async def send_personal_message(self, message: str, client_id: str):
         logger.info(f"Sending message to {client_id}")
