@@ -42,17 +42,18 @@ class SelectedWord(SocketEvent):
             message = json.loads(message)["message"]
             game_key = f"room_id_game:{message['room_id']}"
             result_game = json.loads(
-                redis_init.execute_command(
-                    RedisOperations.JSON_GET.value, game_key, "$.word_list"
-                )
+                redis_init.execute_command(RedisOperations.JSON_GET.value, game_key)
             )
+
             logger.info(f"the list of words is: {result_game}")
+            players_word_list = result_game["word_list"]
+            logger.info(f"players_word_list {players_word_list}")
 
             room = Room(
                 players=[
-                    Player(**player)
-                    for player_group in result_game
-                    for player in player_group
+                    Player(**player_group)
+                    for player_group in players_word_list
+                    # for player in player_group
                 ]
             )
 
@@ -74,18 +75,15 @@ class SelectedWord(SocketEvent):
                     f"Word found: {word.word} with description: {word.description}"
                 )
                 game = {}
-                game["selected_word"] = word.word
-                result_game = redis_init.execute_command(
-                    RedisOperations.JSON_SET.value, game_key, "$", json.dumps(game)
+                result_game["selected_word"] = word.word
+                logger.info(f"the result is---{result_game}")
+                result_game_resut = redis_init.execute_command(
+                    RedisOperations.JSON_SET.value,
+                    game_key,
+                    "$",
+                    json.dumps(result_game),
                 )
 
-                await manager.send_personal_message(
-                    {
-                        "event": "word_selected",
-                        "value": word.word,
-                    },
-                    message["sid"],
-                )
                 await manager.broadcast(
                     {
                         "event": "word_choosen",

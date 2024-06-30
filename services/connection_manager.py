@@ -4,6 +4,7 @@ import logging
 
 from services.start_game import StartGame
 from services.selected_word import SelectedWord
+from services.drawing_canvas import DrawingCanvas
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -15,6 +16,11 @@ class ConcreteStartGame(StartGame):
 
 
 class ConcreteSelectedWord(SelectedWord):
+    async def execute(self, *args, **kwargs):
+        pass
+
+
+class ConcreteDrawingCanvas(DrawingCanvas):
     async def execute(self, *args, **kwargs):
         pass
 
@@ -64,6 +70,11 @@ class ConnectionManager:
     async def selected_word(self, websocket: WebSocket, message: str, manager):
         logger.info(f"select word: {message}")
         selected_word_instance = ConcreteSelectedWord()
+        await selected_word_instance.handle(message, manager)
+
+    async def drawing_canvas(self, websocket: WebSocket, message: str, manager):
+        logger.info(f"select word: {message}")
+        selected_word_instance = ConcreteDrawingCanvas()
         await selected_word_instance.handle(message, manager)
 
     async def send_personal_message(self, message: str, client_id: str):
