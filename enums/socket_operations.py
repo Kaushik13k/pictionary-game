@@ -12,6 +12,7 @@ class SocketOperations(Enum):
 
     START_GAME = "start_game"
     SELECTED_WORD = "selected_word"
+    CANVAS = "drawing_canvas"
     END_GAME = "end_game"
 
     START_TURN = "start_turn"
