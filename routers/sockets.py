@@ -7,6 +7,7 @@ from fastapi import APIRouter, WebSocketDisconnect
 from routers.start_game import StartCommand
 from routers.selected_word import SelectedWordCommand
 from routers.drawing_canvas import CanvasCommand
+from routers.chat_room import ChatRoomCommand
 from services.connection_manager import ConnectionManager
 from enums.socket_operations import SocketOperations
 from routers.socket_health import HealthCommand
@@ -24,6 +25,7 @@ class CommandHandler:
             SocketOperations.START_GAME.value: StartCommand(manager),
             SocketOperations.SELECTED_WORD.value: SelectedWordCommand(manager),
             SocketOperations.CANVAS.value: CanvasCommand(manager),
+            SocketOperations.CHAT_ROOM.value: ChatRoomCommand(manager),
         }
 
     def get_command(self, operation: str):

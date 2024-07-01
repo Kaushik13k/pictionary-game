@@ -12,7 +12,7 @@ from services.words_assignment import assign_words
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-GUESS_TIME = 0
+GUESS_TIME = 70
 SELECTION_TIME = 20
 
 
