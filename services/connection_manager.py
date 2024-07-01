@@ -65,7 +65,6 @@ class ConnectionManager:
         await start_game_instance.handle(
             message, manager, words_assign=True, current_round=1
         )
-        await websocket.send_text("start_game check successful")
 
     async def selected_word(self, websocket: WebSocket, message: str, manager):
         logger.info(f"select word: {message}")
