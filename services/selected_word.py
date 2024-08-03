@@ -38,7 +38,7 @@ class Room(BaseModel):
 class SelectedWord(SocketEvent):
     async def handle(self, message, manager):
         try:
-            logger.info(f"inside the selected wowrd!: {message}") 
+            logger.info(f"inside the selected wowrd!: {message}")
             message = json.loads(message)["message"]
             game_key = f"room_id_game:{message['room_id']}"
             result_game = json.loads(
@@ -89,7 +89,7 @@ class SelectedWord(SocketEvent):
                         "event": "word_choosen",
                         "value": {
                             "word_length": len(word.word),
-                            "value": f"{'_' * len(word.word)}",
+                            "value": f"{'_ ' * len(word.word)}",
                         },
                     },
                     message["sid"],
