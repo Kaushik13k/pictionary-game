@@ -26,9 +26,14 @@ class FetchPlayers(RoomEvents):
             )
             if not players:
                 raise FetchPlayersException("wrong room id provided.")
+
             logger.info(f"Players fetched successfully for the room {players}")
             players = json.loads(players)
-            return success(players, message="Players fetched successfully")
+            sorted_players = sorted(
+                players, key=lambda player: player["score"], reverse=True
+            )
+
+            return success(sorted_players, message="Players fetched successfully")
         except Exception as e:
             logger.error(f"There was error fetching players: {e}")
             logger.info(traceback.format_exc())
