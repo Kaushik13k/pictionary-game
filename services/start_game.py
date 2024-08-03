@@ -87,12 +87,6 @@ class StartGame(SocketEvent):
                 logger.info(f"calculation logic done")
 
                 game["score_details"] = []
-                # redis_init.execute_command(
-                #     RedisOperations.JSON_SET.value,
-                #     game_key,
-                #     "$",
-                #     json.dumps(game),
-                # )
 
                 game["turns"] = game.get("turns", 0) + 1
                 self.set_game_data(game_key, game)
@@ -133,10 +127,12 @@ class StartGame(SocketEvent):
         if players_guessed == total_players:
             guessing_score = DRAWER_GUESS_MAX_POINTS
         else:
-            guessing_score = (players_guessed/ total_players) * DRAWER_GUESS_MAX_POINTS
+            guessing_score = (players_guessed / total_players) * DRAWER_GUESS_MAX_POINTS
 
         # Timing points
-        timing_score = GUESS_TIME / total_time * DRAWER_TIME_MAX_POINTS
+        timing_score = (
+            GUESS_TIME / total_time * DRAWER_TIME_MAX_POINTS if total_time > 0 else 0
+        )
 
         final_score = guessing_score + timing_score
         return final_score
