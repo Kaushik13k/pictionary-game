@@ -1,11 +1,10 @@
 import logging
 import json
 
-from enums.redis_operations import RedisOperations
 from init.redis_init import redis_init
 from models.players import PlayersModel
 from services.start_game import StartGame
-from templates.socket_events import SocketEvent
+from enums.redis_operations import RedisOperations
 from services.connection_manager import ConnectionManager
 
 

@@ -1,7 +1,5 @@
 import json
-import asyncio
 import logging
-import traceback
 
 from init.redis_init import redis_init
 from templates.socket_events import SocketEvent

@@ -2,8 +2,8 @@ import logging
 import traceback
 from fastapi import APIRouter
 
-from templates.room_events import RoomEvents
 from utils.get_room_ids import get_room_ids
+from templates.room_events import RoomEvents
 from utils.api_response import success, error
 
 

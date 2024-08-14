@@ -1,7 +1,8 @@
-from fastapi import HTTPException
-import asyncio
-from typing import Dict, Optional
 import logging
+import asyncio
+from typing import Dict
+from fastapi import HTTPException
+
 from services.end_turn import end_turn
 from services.connection_manager import ConnectionManager
 

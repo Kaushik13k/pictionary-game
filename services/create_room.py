@@ -3,12 +3,12 @@ import logging
 import traceback
 from fastapi import APIRouter
 
+from routers.sockets import manager
 from init.redis_init import redis_init
 from templates.room_events import RoomEvents
 from utils.api_response import success, error
 from enums.redis_operations import RedisOperations
 from exceptions.exceptions import CreateRoomException
-from routers.sockets import manager
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
