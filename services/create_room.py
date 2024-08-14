@@ -1,14 +1,15 @@
-import json
 import logging
 import traceback
 from fastapi import APIRouter
 
 from routers.sockets import manager
-from init.redis_init import redis_init
 from templates.room_events import RoomEvents
 from utils.api_response import success, error
-from enums.redis_operations import RedisOperations
+from enums.redis_locations import RedisLocations
+from redis_json.redis_operations import RedisJson
 from exceptions.exceptions import CreateRoomException
+from enums.messages import EventSuccessMessages, EventFailedMessages
+from enums.socket_operations import SocketOperations
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -16,6 +17,15 @@ logger = logging.getLogger(__name__)
 
 class CreateRoom(RoomEvents):
     async def handle_room(self):
+        """
+        Handle the creation of a new room event.
+
+        This method generates a unique room ID and sets the room data in Redis.
+
+        Returns:
+            dict: A success response with room details(room_id, is_creator, player_id) if the room is created successfully.
+            dict: An error response if there is a failure in creating the room.
+        """
         try:
             room_id = self.generate_unique_room_id()
 
@@ -36,15 +46,23 @@ class CreateRoom(RoomEvents):
                 ],
             }
             redis_key = f"room_id_players:{room_id}"
-            result = redis_init.execute_command(
-                RedisOperations.JSON_SET.value, redis_key, "$", json.dumps(user_data)
+            result = RedisJson.set(
+                redis_key=redis_key,
+                redis_value=user_data,
+                location=RedisLocations.NIL.value,
             )
-            if result.decode("utf-8") == "OK":
-                logger.info(f"Set data in Redis for key {redis_key}")
+
+            if result:
+                logger.info(
+                    f"Room created and data set successfully for key {redis_key}"
+                )
 
                 await manager.activate_connection(self.room_data.sid)
                 await manager.send_personal_message(
-                    {"event": "create_room", "value": "Room created"},
+                    {
+                        "event": SocketOperations.CREATE.value,
+                        "value": EventSuccessMessages.ROOM_CREATED.value,
+                    },
                     self.room_data.sid,
                 )
                 return success(
@@ -53,7 +71,7 @@ class CreateRoom(RoomEvents):
                         "is_creator": True,
                         "player_id": user_data["members"][0]["player_id"],
                     },
-                    message="Rooms fetched successfully",
+                    message=EventSuccessMessages.ROOM_CREATION_SUCCESS.value,
                 )
 
             else:
@@ -63,4 +81,4 @@ class CreateRoom(RoomEvents):
         except Exception as e:
             logger.error(e)
             logger.error(traceback.format_exc())
-            return error("Failed to create room")
+            return error(EventFailedMessages.ROOM_CREATION_FAILED.value)
