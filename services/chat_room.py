@@ -8,8 +8,9 @@ from typing import List, Dict, Union
 from init.redis_init import redis_init
 from services.socket_event import SocketEvent
 from enums.redis_operations import RedisOperations
+from services.timer import TimerManager
 from services.words_assignment import assign_words
-
+from services.end_turn import end_turn
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -42,7 +43,7 @@ class ChatRoom(SocketEvent):
             selected_word = result_game["selected_word"]
             logger.info(f"the selected word is: {selected_word}")
             res = list(filter(lambda player: player["sid"] == message["sid"], players))
-            logger.info("the res is: ", res)
+            logger.info(f"the res is: {res}")
             if res:
                 player_item, *rest = res
                 logger.info(f'the res name is: {player_item.get("player_name")}')
@@ -70,6 +71,13 @@ class ChatRoom(SocketEvent):
                     }
                     result_game["score_details"].append(game_score_details)
                     self.set_game_data(game_key, result_game)
+                    if len(result_game["score_details"]) == len(players) - 1:
+                        TimerManager.instance().stop_timer(message["room_id"])
+                        # await TimerManager.instance().wait_for_timer(message["room_id"])
+                        logger.info(
+                            f"message: Timer for Game {message['room_id']} stopped"
+                        )
+                        await end_turn(message["room_id"], manager, is_time_up=False)
 
                 else:
                     logger.info("the word didnot match. Hence broadcasting!")
