@@ -73,7 +73,6 @@ class ChatRoom(SocketEvent):
                     self.set_game_data(game_key, result_game)
                     if len(result_game["score_details"]) == len(players) - 1:
                         TimerManager.instance().stop_timer(message["room_id"])
-                        # await TimerManager.instance().wait_for_timer(message["room_id"])
                         logger.info(
                             f"message: Timer for Game {message['room_id']} stopped"
                         )

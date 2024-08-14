@@ -56,18 +56,7 @@ def set_game_data(game_key, game):
 async def get_game_data(game_key, manager):
     game = redis_init.execute_command(RedisOperations.JSON_GET.value, game_key)
     logger.info(f"Game data: {game}")
-    # if game is None:
-    #     game = {}
-    #     if game.get("rounds") is None:
-    #         game["score_details"] = []
-    #         game["rounds"] = 1
-    #     await manager.broadcast(
-    #         {"event": "round_begin", "value": f"Round {game['rounds']} Starts."}
-    #     )
-    #     set_game_data(game_key, game)
-    # else:
     game = json.loads(game)
-    # game["turns"] = game.get("turns", 0) + 1
     if "turns" in game and game["turns"] == 0:
         await manager.broadcast(
             {
@@ -209,11 +198,6 @@ async def calculate_guesser_scores(game_key, redis_key, drawer):
 async def end_turn(room_id: str, manager, is_time_up=False):
     redis_key = f"room_id_players:{room_id}"
     game_key = f"room_id_game:{room_id}"
-
-    # if is_time_up:
-    #     TimerManager.instance().stop_timer(room_id)
-    #     await TimerManager.instance().wait_for_timer(room_id)
-    #     logger.info(f"message: Timer for Game {room_id']} stopped")
 
     logger.info(f"calling the calculation logic")
     user = get_user_data(redis_key)

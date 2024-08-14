@@ -17,6 +17,4 @@ class RoomEvents(ABC):
     def generate_unique_room_id(self):
         while True:
             room_id = str(uuid.uuid4()) + "-" + str(int((datetime.now()).timestamp()))
-            # existing_ids = get_room_ids()
-            # if room_id not in existing_ids:
             return room_id

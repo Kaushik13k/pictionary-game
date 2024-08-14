@@ -24,7 +24,6 @@ class SimpleTimerStrategy(TimerStrategy):
             if TimerManager.instance().is_stopped(game_id):
                 logger.info(f"Timer for Game {game_id} stopped at {second} seconds.")
                 return
-            # print(f"Game {game_id}: {second}")
             await asyncio.sleep(1)
         logger.info(f"Timer for Game {game_id} completed.")
         await manager.broadcast(
@@ -32,7 +31,6 @@ class SimpleTimerStrategy(TimerStrategy):
         )
         try:
             TimerManager.instance().stop_timer(game_id)
-            # await TimerManager.instance().wait_for_timer(game_id)
             await end_turn(game_id, manager, is_time_up=True)
         except Exception as e:
             logger.error(e)

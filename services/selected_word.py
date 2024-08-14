@@ -51,11 +51,7 @@ class SelectedWord(SocketEvent):
             logger.info(f"players_word_list {players_word_list}")
 
             room = Room(
-                players=[
-                    Player(**player_group)
-                    for player_group in players_word_list
-                    # for player in player_group
-                ]
+                players=[Player(**player_group) for player_group in players_word_list]
             )
 
             sid_to_player = {player.sid: player for player in room.players}

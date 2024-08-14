@@ -50,7 +50,6 @@ async def websocket_endpoint(websocket: WebSocket):
             command = command_handler.get_command(event)
             if command:
                 asyncio.create_task(command.execute(websocket, data))
-                # await command.execute(websocket, data)
             else:
                 await websocket.send_text("Unknown event")
 
