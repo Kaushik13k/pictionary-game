@@ -6,10 +6,11 @@ from pydantic import BaseModel, Field
 from typing import List, Dict, Union
 
 from init.redis_init import redis_init
-from services.socket_event import SocketEvent
+from templates.socket_events import SocketEvent
 from enums.redis_operations import RedisOperations
 from services.timer import TimerManager
-from services.words_assignment import assign_words
+from utils.words_assignment import assign_words
+from services.connection_manager import ConnectionManager
 
 
 logging.basicConfig(level=logging.INFO)
@@ -37,7 +38,7 @@ class Room(BaseModel):
 
 
 class SelectedWord(SocketEvent):
-    async def handle(self, message, manager):
+    async def handle(self, message, manager: ConnectionManager):
         try:
             logger.info(f"inside the selected wowrd!: {message}")
             message = json.loads(message)["message"]

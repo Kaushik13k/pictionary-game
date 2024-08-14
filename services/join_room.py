@@ -4,7 +4,7 @@ import traceback
 
 from init.redis_init import redis_init
 from init.socket_init import socket_io
-from services.room_events import RoomEvents
+from templates.room_events import RoomEvents
 from enums.redis_operations import RedisOperations
 from exceptions.exceptions import JoinRoomException
 from utils.api_response import success, error

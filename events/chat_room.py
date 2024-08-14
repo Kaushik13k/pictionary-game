@@ -1,9 +1,10 @@
 from starlette.websockets import WebSocket
-from services.socket_event import SocketEvent
+from templates.socket_events import SocketEvent
+from services.connection_manager import ConnectionManager
 
 
 class ChatRoomCommand(SocketEvent):
-    def __init__(self, manager):
+    def __init__(self, manager: ConnectionManager):
         self.manager = manager
 
     async def execute(self, websocket: WebSocket, data: str):

@@ -5,7 +5,8 @@ from enums.redis_operations import RedisOperations
 from init.redis_init import redis_init
 from models.players import PlayersModel
 from services.start_game import StartGame
-from services.socket_event import SocketEvent
+from templates.socket_events import SocketEvent
+from services.connection_manager import ConnectionManager
 
 
 class ConcreteStartGame(StartGame):
@@ -26,7 +27,7 @@ DRAWER_GUESS_MAX_POINTS = 300
 DRAWER_TIME_MAX_POINTS = 100
 
 
-async def end_round(game, game_key, redis_key, manager):
+async def end_round(game, game_key, redis_key, manager: ConnectionManager):
 
     await manager.broadcast(
         {"event": "round_end", "value": f"Round {game['rounds']} ends."}
@@ -53,7 +54,7 @@ def set_game_data(game_key, game):
     )
 
 
-async def get_game_data(game_key, manager):
+async def get_game_data(game_key, manager: ConnectionManager):
     game = redis_init.execute_command(RedisOperations.JSON_GET.value, game_key)
     logger.info(f"Game data: {game}")
     game = json.loads(game)
@@ -195,7 +196,7 @@ async def calculate_guesser_scores(game_key, redis_key, drawer):
     return retrieved_value
 
 
-async def end_turn(room_id: str, manager, is_time_up=False):
+async def end_turn(room_id: str, manager: ConnectionManager, is_time_up: bool = False):
     redis_key = f"room_id_players:{room_id}"
     game_key = f"room_id_game:{room_id}"
 

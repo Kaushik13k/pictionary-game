@@ -6,7 +6,7 @@ from fastapi import APIRouter
 from enums.redis_operations import RedisOperations
 from exceptions.exceptions import FetchPlayersException
 from init.redis_init import redis_init
-from services.room_events import RoomEvents
+from templates.room_events import RoomEvents
 from utils.api_response import success, error
 
 

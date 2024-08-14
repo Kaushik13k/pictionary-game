@@ -39,7 +39,7 @@ word_pool = [
 ]
 
 
-async def assign_words(num_rounds, num_players, words_per_round):
+async def assign_words(num_rounds: int, num_players: int, words_per_round: int):
     num_rounds = 3
     words_per_round = 3
 

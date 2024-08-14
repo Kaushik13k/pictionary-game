@@ -4,10 +4,11 @@ import logging
 import traceback
 
 from init.redis_init import redis_init
-from services.socket_event import SocketEvent
+from templates.socket_events import SocketEvent
 from enums.redis_operations import RedisOperations
-from services.words_assignment import assign_words
+from utils.words_assignment import assign_words
 from models.players import PlayersModel
+from services.connection_manager import ConnectionManager
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -23,7 +24,9 @@ DRAWER_TIME_MAX_POINTS = 100
 
 
 class StartGame(SocketEvent):
-    async def handle(self, message, manager, words_assign=True, current_round=1):
+    async def handle(
+        self, message, manager: ConnectionManager, words_assign=True, current_round=1
+    ):
         try:
             logger.info(f"The Game is started!...")
             room_id = json.loads(message)["message"]["room_id"]
@@ -201,7 +204,7 @@ class StartGame(SocketEvent):
         logger.info(f"Retrieved Value: {retrieved_value}")
         return retrieved_value
 
-    async def get_game_data(self, game_key, manager):
+    async def get_game_data(self, game_key, manager: ConnectionManager):
         game = redis_init.execute_command(RedisOperations.JSON_GET.value, game_key)
         logger.info(f"Game data: {game}")
         if game is None:
@@ -242,7 +245,7 @@ class StartGame(SocketEvent):
         )
         logger.info(f"Set data in Redis for key {redis_key}")
 
-    async def end_round(self, game, game_key, redis_key, manager):
+    async def end_round(self, game, game_key, redis_key, manager: ConnectionManager):
 
         await manager.broadcast(
             {"event": "round_end", "value": f"Round {game['rounds']} ends."}
