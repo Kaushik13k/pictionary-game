@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 
-from models.join_room import JoinRoomModel
 from services.join_room import JoinRoom
+from models.join_room import JoinRoomModel
 
 router = APIRouter()
 

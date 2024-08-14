@@ -1,8 +1,8 @@
 import logging
 from fastapi import APIRouter
 
-from models.fetch_game import FetchGamesModel
 from services.fetch_game import FetchGames
+from models.fetch_game import FetchGamesModel
 
 router = APIRouter()
 logger = logging.getLogger(__name__)

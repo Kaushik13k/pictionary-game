@@ -1,5 +1,5 @@
-from services.socket_event import SocketEvent
 from starlette.websockets import WebSocket
+from services.socket_event import SocketEvent
 
 
 class StartCommand(SocketEvent):

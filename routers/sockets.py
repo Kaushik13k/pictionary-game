@@ -4,13 +4,15 @@ import logging
 from datetime import datetime
 from starlette.websockets import WebSocket
 from fastapi import APIRouter, WebSocketDisconnect
-from routers.start_game import StartCommand
-from routers.selected_word import SelectedWordCommand
-from routers.drawing_canvas import CanvasCommand
-from routers.chat_room import ChatRoomCommand
-from services.connection_manager import ConnectionManager
+
+from events.start_game import StartCommand
+from events.chat_room import ChatRoomCommand
+from events.socket_health import HealthCommand
+from events.drawing_canvas import CanvasCommand
+from events.selected_word import SelectedWordCommand
 from enums.socket_operations import SocketOperations
-from routers.socket_health import HealthCommand
+from services.connection_manager import ConnectionManager
+
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -22,10 +24,10 @@ class CommandHandler:
     def __init__(self, manager: ConnectionManager):
         self.commands = {
             SocketOperations.HEALTH.value: HealthCommand(manager),
-            SocketOperations.START_GAME.value: StartCommand(manager),
-            SocketOperations.SELECTED_WORD.value: SelectedWordCommand(manager),
             SocketOperations.CANVAS.value: CanvasCommand(manager),
+            SocketOperations.START_GAME.value: StartCommand(manager),
             SocketOperations.CHAT_ROOM.value: ChatRoomCommand(manager),
+            SocketOperations.SELECTED_WORD.value: SelectedWordCommand(manager),
         }
 
     def get_command(self, operation: str):

@@ -4,9 +4,7 @@ from fastapi import APIRouter
 
 from services.fetch_rooms import FetchRooms
 
-
 router = APIRouter()
-
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
