@@ -10,9 +10,10 @@ from templates.socket_events import SocketEvent
 from redis_json.redis_operations import RedisJson
 from exceptions.exceptions import ChatRoomException
 
-from enums.redis_operations import RedisOperations
-from enums.redis_locations import RedisLocations
+
 from enums.messages import EventSuccessMessages
+from enums.redis_locations import RedisLocations
+from enums.redis_operations import RedisOperations
 from enums.socket_operations import SocketOperations
 
 
