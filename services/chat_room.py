@@ -1,11 +1,19 @@
 import json
 import logging
+import traceback
+
+from services.end_turn import end_turn
+from services.timer import TimerManager
 
 from init.redis_init import redis_init
-from services.timer import TimerManager
-from services.end_turn import end_turn
 from templates.socket_events import SocketEvent
+from redis_json.redis_operations import RedisJson
+from exceptions.exceptions import ChatRoomException
+
 from enums.redis_operations import RedisOperations
+from enums.redis_locations import RedisLocations
+from enums.messages import EventSuccessMessages
+from enums.socket_operations import SocketOperations
 
 
 logging.basicConfig(level=logging.INFO)
@@ -14,78 +22,93 @@ logger = logging.getLogger(__name__)
 
 class ChatRoom(SocketEvent):
     def set_game_data(self, game_key, game):
-        result_game = redis_init.execute_command(
+        game_result = redis_init.execute_command(
             RedisOperations.JSON_SET.value, game_key, "$", json.dumps(game)
         )
 
     async def handle(self, message, manager):
         try:
-            logger.info(f"inside the chat_room!: {message}")
+            logger.info(f"Handling chat room with message: {message}")
             message = json.loads(message)["message"]
             game_key = f"room_id_game:{message['room_id']}"
             redis_key = f"room_id_players:{message['room_id']}"
 
-            result_game = json.loads(
-                redis_init.execute_command(RedisOperations.JSON_GET.value, game_key)
+            game_result = json.loads(
+                RedisJson().get(redis_key=game_key, location=RedisLocations.NIL.value)
             )
+            if not game_result:
+                raise ChatRoomException("The game result are not found in redis.")
+
             players = json.loads(
-                redis_init.execute_command(
-                    RedisOperations.JSON_GET.value,
-                    redis_key,
-                    ".members",
+                RedisJson().get(
+                    redis_key=redis_key, location=RedisLocations.MEMBERS.value
                 )
             )
-            logger.info(f"the result_game is: {result_game}")
-            selected_word = result_game["selected_word"]
-            logger.info(f"the selected word is: {selected_word}")
-            res = list(filter(lambda player: player["sid"] == message["sid"], players))
-            logger.info(f"the res is: {res}")
-            if res:
-                player_item, *rest = res
-                logger.info(f'the res name is: {player_item.get("player_name")}')
+            if not players:
+                raise ChatRoomException("The players are not found in redis.")
 
-                if message["word"].lower() == selected_word:
-                    logger.info("the word matched!")
+            selected_word = game_result["selected_word"]
 
-                    await manager.send_personal_message(
-                        {"event": "guessed", "value": "You have guessed the word"},
-                        message["sid"],
-                    )
+            player_result = list(
+                filter(lambda player: player["sid"] == message["sid"], players)
+            )
+            if not player_result:
+                raise ChatRoomException("The players result is not found in redis.")
 
-                    await manager.broadcast(
-                        {
-                            "event": "word_guessed",
-                            "value": f"{player_item.get('player_name')} has guessed the word",
+            player_item, *rest = player_result
+
+            if message["word"].lower() == selected_word.lower():
+                logger.info("The word is matched.")
+
+                await manager.send_personal_message(
+                    {
+                        "event": SocketOperations.WORD_GUESSED_PERSONAL.value,
+                        "value": EventSuccessMessages.CHATROOM_WORD_GUESSED.value,
+                    },
+                    message["sid"],
+                )
+
+                await manager.broadcast(
+                    {
+                        "event": SocketOperations.WORD_GUESSED_BROADCAST.value,
+                        "value": f"{player_item.get('player_name')} has guessed the word",
+                    },
+                    message["sid"],
+                )
+
+                game_score_details = {
+                    "sid": message["sid"],
+                    "time_elapsed": message["time_elapsed"],
+                    "position": len(game_result["score_details"]) + 1,
+                }
+                game_result["score_details"].append(game_score_details)
+
+                is_set_game_data = RedisJson().set(
+                    redis_key=game_key, redis_value=game_result
+                )
+                if not is_set_game_data:
+                    raise ChatRoomException("The game result are not set in redis.")
+
+                if len(game_result["score_details"]) == len(players) - 1:
+                    TimerManager.instance().stop_timer(message["room_id"])
+                    logger.info(f"Timer for Game {message['room_id']} stopped")
+                    await end_turn(message["room_id"], manager, is_time_up=False)
+
+            else:
+                logger.info("The word did'nt match. Hence broadcasting.")
+                await manager.broadcast(
+                    {
+                        "event": SocketOperations.CHAT_ROOM.value,
+                        "value": {
+                            "word": message["word"],
+                            "player_name": player_item.get("player_name"),
                         },
-                        message["sid"],
-                    )
-
-                    game_score_details = {
-                        "sid": message["sid"],
-                        "time_elapsed": message["time_elapsed"],
-                        "position": len(result_game["score_details"]) + 1,
-                    }
-                    result_game["score_details"].append(game_score_details)
-                    self.set_game_data(game_key, result_game)
-                    if len(result_game["score_details"]) == len(players) - 1:
-                        TimerManager.instance().stop_timer(message["room_id"])
-                        logger.info(
-                            f"message: Timer for Game {message['room_id']} stopped"
-                        )
-                        await end_turn(message["room_id"], manager, is_time_up=False)
-
-                else:
-                    logger.info("the word didnot match. Hence broadcasting!")
-                    await manager.broadcast(
-                        {
-                            "event": "chat_room",
-                            "value": {
-                                "word": message["word"],
-                                "player_name": player_item.get("player_name"),
-                            },
-                        },
-                        message["sid"],
-                    )
+                    },
+                    message["sid"],
+                )
 
         except Exception as e:
-            logger.info("ERROR!")
+            logger.error("Error encountered in chat handling.")
+            logger.error(e)
+            logger.info(traceback.format_exc())
+            return

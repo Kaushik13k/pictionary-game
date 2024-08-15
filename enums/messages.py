@@ -4,9 +4,12 @@ from enum import Enum
 class EventSuccessMessages(Enum):
     ROOM_CREATION_SUCCESS = "Room created successfully."
     ROOM_JOIN_SUCCESS = "Joined the room."
+
     GET_PLAYER_SUCCESS = "Players fetched successfully."
     GET_GAME_SUCCESS = "Game details fetched."
     GET_ROOMS_SUCCESS = "Rooms fetched successfully."
+
+    CHATROOM_WORD_GUESSED = "You have guessed the word."
 
 
 class EventFailedMessages(Enum):

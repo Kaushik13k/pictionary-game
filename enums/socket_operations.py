@@ -21,3 +21,6 @@ class SocketOperations(Enum):
 
     START_ROUND = "start_round"
     END_ROUND = "end_round"
+
+    WORD_GUESSED_BROADCAST = "word_guessed"
+    WORD_GUESSED_PERSONAL = "guessed"

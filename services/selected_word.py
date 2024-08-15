@@ -88,7 +88,7 @@ class SelectedWord(SocketEvent):
                     },
                     message["sid"],
                 )
-                TimerManager.instance().start_timer(message["room_id"], 5, manager)
+                TimerManager.instance().start_timer(message["room_id"], 15, manager)
                 # TODO: Start timer for 60 seconds
                 logger.info(
                     f"message: Timer for Game {message['room_id']} started for 60 seconds"
