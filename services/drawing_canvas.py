@@ -2,14 +2,13 @@ import json
 import logging
 
 from templates.socket_events import SocketEvent
-from services.connection_manager import ConnectionManager
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
 class DrawingCanvas(SocketEvent):
-    async def handle(self, message, manager: ConnectionManager):
+    async def handle(self, message, manager):
         try:
             message = json.loads(message)["message"]
             await manager.broadcast(

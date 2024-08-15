@@ -7,7 +7,6 @@ from init.redis_init import redis_init
 from services.timer import TimerManager
 from templates.socket_events import SocketEvent
 from enums.redis_operations import RedisOperations
-from services.connection_manager import ConnectionManager
 
 
 logging.basicConfig(level=logging.INFO)
@@ -35,7 +34,7 @@ class Room(BaseModel):
 
 
 class SelectedWord(SocketEvent):
-    async def handle(self, message, manager: ConnectionManager):
+    async def handle(self, message, manager):
         try:
             logger.info(f"inside the selected wowrd!: {message}")
             message = json.loads(message)["message"]

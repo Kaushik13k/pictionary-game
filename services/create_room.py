@@ -5,11 +5,12 @@ from fastapi import APIRouter
 from routers.sockets import manager
 from templates.room_events import RoomEvents
 from utils.api_response import success, error
-from enums.redis_locations import RedisLocations
 from redis_json.redis_operations import RedisJson
 from exceptions.exceptions import CreateRoomException
-from enums.messages import EventSuccessMessages, EventFailedMessages
+
+from enums.redis_locations import RedisLocations
 from enums.socket_operations import SocketOperations
+from enums.messages import EventSuccessMessages, EventFailedMessages
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -46,10 +47,10 @@ class CreateRoom(RoomEvents):
                 ],
             }
             redis_key = f"room_id_players:{room_id}"
-            result = RedisJson.set(
+            result = RedisJson().set(
                 redis_key=redis_key,
                 redis_value=user_data,
-                location=RedisLocations.NIL.value,
+                location=RedisLocations.ROOT.value,
             )
 
             if result:
@@ -61,7 +62,7 @@ class CreateRoom(RoomEvents):
                 await manager.send_personal_message(
                     {
                         "event": SocketOperations.CREATE.value,
-                        "value": EventSuccessMessages.ROOM_CREATED.value,
+                        "value": EventSuccessMessages.ROOM_CREATION_SUCCESS.value,
                     },
                     self.room_data.sid,
                 )

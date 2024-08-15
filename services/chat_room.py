@@ -6,7 +6,6 @@ from services.timer import TimerManager
 from services.end_turn import end_turn
 from templates.socket_events import SocketEvent
 from enums.redis_operations import RedisOperations
-from services.connection_manager import ConnectionManager
 
 
 logging.basicConfig(level=logging.INFO)
@@ -19,7 +18,7 @@ class ChatRoom(SocketEvent):
             RedisOperations.JSON_SET.value, game_key, "$", json.dumps(game)
         )
 
-    async def handle(self, message, manager: ConnectionManager):
+    async def handle(self, message, manager):
         try:
             logger.info(f"inside the chat_room!: {message}")
             message = json.loads(message)["message"]

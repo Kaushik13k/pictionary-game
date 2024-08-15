@@ -4,7 +4,6 @@ from typing import Dict
 from fastapi import HTTPException
 
 from services.end_turn import end_turn
-from services.connection_manager import ConnectionManager
 
 
 logging.basicConfig(level=logging.INFO)
@@ -14,7 +13,7 @@ logger = logging.getLogger(__name__)
 class TimerStrategy:
     """Strategy pattern for different timer behaviors."""
 
-    async def run(self, game_id: int, duration: int, manager: ConnectionManager):
+    async def run(self, game_id: int, duration: int, manager):
         """Run the timer for the given duration."""
         raise NotImplementedError("This method should be implemented by subclasses.")
 
@@ -22,7 +21,7 @@ class TimerStrategy:
 class SimpleTimerStrategy(TimerStrategy):
     """Simple strategy that just counts down."""
 
-    async def run(self, game_id: int, duration: int, manager: ConnectionManager):
+    async def run(self, game_id: int, duration: int, manager):
         for second in range(1, duration + 1):
             if TimerManager.instance().is_stopped(game_id):
                 logger.info(f"Timer for Game {game_id} stopped at {second} seconds.")
@@ -58,12 +57,10 @@ class TimerManager:
         return TimerManager._instance
 
     @staticmethod
-    def create_timer(
-        strategy: TimerStrategy, game_id: int, duration: int, manager: ConnectionManager
-    ):
+    def create_timer(strategy: TimerStrategy, game_id: int, duration: int, manager):
         return asyncio.create_task(strategy.run(game_id, duration, manager))
 
-    def start_timer(self, game_id: int, duration: int, manager: ConnectionManager):
+    def start_timer(self, game_id: int, duration: int, manager):
         if game_id in self.timers:
             raise HTTPException(
                 status_code=400, detail=f"Timer for Game {game_id} is already running"
