@@ -7,6 +7,7 @@ from services.start_game import StartGame
 from services.selected_word import SelectedWord
 from services.drawing_canvas import DrawingCanvas
 
+from enums.socket_operations import SocketOperations
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -50,7 +51,9 @@ class ConnectionManager:
             "connected": False,
         }
 
-        await websocket.send_json({"event": "connect", "value": client_id})
+        await websocket.send_json(
+            {"event": SocketOperations.CONNECT.value, "value": client_id}
+        )
 
     async def activate_connection(self, client_id: str):
         self.active_connections[client_id]["connected"] = True
@@ -67,24 +70,20 @@ class ConnectionManager:
         )
 
     async def start_game(self, websocket: WebSocket, message: str, manager):
-        logger.info(f"Start game-0: {message}")
         start_game_instance = ConcreteStartGame()
         await start_game_instance.handle(
             message, manager, words_assign=True, current_round=1
         )
 
     async def selected_word(self, websocket: WebSocket, message: str, manager):
-        logger.info(f"select word: {message}")
         selected_word_instance = ConcreteSelectedWord()
         await selected_word_instance.handle(message, manager)
 
     async def drawing_canvas(self, websocket: WebSocket, message: str, manager):
-        logger.info(f"select word: {message}")
         selected_word_instance = ConcreteDrawingCanvas()
         await selected_word_instance.handle(message, manager)
 
     async def chat_room(self, websocket: WebSocket, message: str, manager):
-        logger.info(f"select word: {message}")
         selected_word_instance = ConcreteChatRoom()
         await selected_word_instance.handle(message, manager)
 
