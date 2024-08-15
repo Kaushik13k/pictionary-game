@@ -4,7 +4,7 @@ from typing import List
 from pydantic import BaseModel
 
 from init.redis_init import redis_init
-from services.timer import TimerManager
+from utils.timer import TimerManager
 from templates.socket_events import SocketEvent
 from enums.redis_operations import RedisOperations
 

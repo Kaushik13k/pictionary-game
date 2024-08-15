@@ -3,7 +3,7 @@ import logging
 import traceback
 
 from services.end_turn import end_turn
-from services.timer import TimerManager
+from utils.timer import TimerManager
 
 from init.redis_init import redis_init
 from templates.socket_events import SocketEvent
