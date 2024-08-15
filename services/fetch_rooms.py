@@ -5,6 +5,7 @@ from fastapi import APIRouter
 from utils.get_room_ids import get_room_ids
 from templates.room_events import RoomEvents
 from utils.api_response import success, error
+from enums.messages import EventFailedMessages, EventSuccessMessages
 
 
 router = APIRouter()
@@ -16,8 +17,9 @@ class FetchRooms(RoomEvents):
         try:
             logger.info("Fetching rooms..")
             rooms = get_room_ids()
-            return success(rooms, message="Rooms fetched successfully")
+            return success(rooms, message=EventSuccessMessages.GET_ROOMS_SUCCESS.value)
         except Exception as e:
-            logger.error(f"There was error fetching rooms: {e}")
+            logger.error(f"There was error fetching rooms")
+            logger.error(e)
             logger.info(traceback.format_exc())
-            return error("Failed to fetch rooms")
+            return error(EventFailedMessages.GET_ROOMS_FAILED.value)
