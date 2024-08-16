@@ -11,11 +11,18 @@ class JoinRoomException(Exception):
 class FetchPlayersException(Exception):
     def __init__(self, msg: str = None):
         super().__init__(msg)
-    
+
+
 class FetchGameException(Exception):
     def __init__(self, msg: str = None):
         super().__init__(msg)
 
+
 class ChatRoomException(Exception):
+    def __init__(self, msg: str = None):
+        super().__init__(msg)
+
+
+class StartGameException(Exception):
     def __init__(self, msg: str = None):
         super().__init__(msg)

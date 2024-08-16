@@ -16,7 +16,10 @@ from routers import (
     fetch_game_info,
 )
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s - %(lineno)d",
+)
 logger = logging.getLogger(__name__)
 
 

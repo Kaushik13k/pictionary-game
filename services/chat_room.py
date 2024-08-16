@@ -17,7 +17,10 @@ from enums.redis_operations import RedisOperations
 from enums.socket_operations import SocketOperations
 
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s - %(lineno)d",
+)
 logger = logging.getLogger(__name__)
 
 

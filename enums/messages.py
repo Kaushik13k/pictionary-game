@@ -11,6 +11,8 @@ class EventSuccessMessages(Enum):
 
     CHATROOM_WORD_GUESSED = "You have guessed the word."
 
+    END_GAME_SUCCESS = "The game has ended."
+
 
 class EventFailedMessages(Enum):
     ROOM_CREATION_FAILED = "Room creation failed."

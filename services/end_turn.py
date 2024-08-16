@@ -12,7 +12,10 @@ class ConcreteStartGame(StartGame):
         pass
 
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s - %(lineno)d",
+)
 logger = logging.getLogger(__name__)
 
 GUESS_TIME = 40
@@ -56,15 +59,6 @@ async def get_game_data(game_key, manager):
     game = redis_init.execute_command(RedisOperations.JSON_GET.value, game_key)
     logger.info(f"Game data: {game}")
     game = json.loads(game)
-    if "turns" in game and game["turns"] == 0:
-        await manager.broadcast(
-            {
-                "event": "round_begin",
-                "value": f"Round {game['rounds']} Starts.",
-            }
-        )
-    else:
-        return game
     return game
 
 
@@ -213,29 +207,34 @@ async def end_turn(room_id: str, manager, is_time_up: bool = False):
     set_game_data(game_key, game)
     logger.info(f"score_details made empty")
 
+    current_round = game["rounds"]
+
     players = user["members"]
     if game["turns"] >= len(players):
+        logger.info(
+            f"End of round, player_length = {len(players)}, turns = {game['turns']}"
+        )
         await end_round(game, game_key, redis_key, manager)
+        current_round += 1
     logger.info(f"end_round is called")
-    logger.info(f"got user details: {user}")
 
     user["members"] = players[1:] + players[:1]
-    logger.info(f"New player order: {user['members']}")
     set_user_data(redis_key, user)
     logger.info(f"~~~")
-    current_round = game["rounds"] + 1
-    logger.info(f"All set to start 2nd round~~~ :{current_round}")
 
     try:
         start_game_instance = ConcreteStartGame()
     except Exception as e:
         logger.error(f"Exception occurred: {e}")
 
+    logger.info(f"All set to start 2nd round~~~ :{current_round}")
+
     message = {"message": {"room_id": room_id}}
 
     await start_game_instance.handle(
         message=json.dumps(message),
         manager=manager,
-        words_assign=False,
+        is_words_assign=False,
+        current_turn=current_round,
         current_round=current_round,
     )

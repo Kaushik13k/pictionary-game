@@ -14,12 +14,15 @@ class SocketOperations(Enum):
     SELECTED_WORD = "selected_word"
     CANVAS = "drawing_canvas"
     CHAT_ROOM = "chat_room"
-    # END_GAME = "end_game"
+
+    WORD_TO_SELECT = "select_word"
+    CHOOSING_WORD = "choosing_word"
+    END_GAME = "end_game"
 
     # START_TURN = "start_turn"
     # END_TURN = "end_turn"
 
-    # START_ROUND = "start_round"
+    ROUND_BEGIN = "round_begin"
     # END_ROUND = "end_round"
 
     WORD_GUESSED_BROADCAST = "word_guessed"

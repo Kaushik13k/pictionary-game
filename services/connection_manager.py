@@ -9,7 +9,10 @@ from services.drawing_canvas import DrawingCanvas
 
 from enums.socket_operations import SocketOperations
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s - %(lineno)d",
+)
 logger = logging.getLogger(__name__)
 
 
@@ -72,7 +75,7 @@ class ConnectionManager:
     async def start_game(self, websocket: WebSocket, message: str, manager):
         start_game_instance = ConcreteStartGame()
         await start_game_instance.handle(
-            message, manager, words_assign=True, current_round=1
+            message, manager, is_words_assign=True, current_turn=1, current_round=1
         )
 
     async def selected_word(self, websocket: WebSocket, message: str, manager):

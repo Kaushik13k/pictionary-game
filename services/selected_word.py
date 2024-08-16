@@ -9,7 +9,10 @@ from templates.socket_events import SocketEvent
 from enums.redis_operations import RedisOperations
 
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s - %(lineno)d",
+)
 logger = logging.getLogger(__name__)
 
 
@@ -43,7 +46,7 @@ class SelectedWord(SocketEvent):
                 redis_init.execute_command(RedisOperations.JSON_GET.value, game_key)
             )
 
-            logger.info(f"the list of words is: {result_game}")
+            # logger.info(f"the list of words is: {result_game}")
             players_word_list = result_game["word_list"]
             logger.info(f"players_word_list {players_word_list}")
 
@@ -99,7 +102,7 @@ class SelectedWord(SocketEvent):
             result_game = json.loads(
                 redis_init.execute_command(RedisOperations.JSON_GET.value, game_key)
             )
-            logger.info(f"the list of words is: {result_game}")
+            # logger.info(f"the list of words is: {result_game}")
 
         except Exception as e:
             logger.info("ERROR!")

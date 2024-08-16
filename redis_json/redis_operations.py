@@ -12,16 +12,22 @@ logger = logging.getLogger(__name__)
 
 
 class RedisJson:
-    def get(self, redis_key: str, location: str = RedisLocations.ROOT.value) -> Optional[dict]:
+    def get(
+        self, redis_key: str, location: str = RedisLocations.ROOT.value
+    ) -> Optional[dict]:
         try:
-            logger.info(f"Redis get operation called for key {redis_key}")
+            logger.info(
+                f"Redis get operation called for key {redis_key}, location {location}"
+            )
             result = redis_init.execute_command(
                 RedisOperations.JSON_GET.value, redis_key, location
             )
             if result:
                 logger.info(f"Redis get operation successful.")
                 return result
-            logger.error(f"Error in Redis get operation.")
+            logger.info(
+                f"The result was None. The key is not created yet/Wrong key provided."
+            )
             return None
         except Exception as e:
             logger.error(f"Error in Redis get operation for key {redis_key}")
@@ -29,7 +35,12 @@ class RedisJson:
             logger.error(traceback.format_exc())
             return None
 
-    def set(self, redis_key: str, redis_value: dict, location: str = RedisLocations.ROOT.value) -> bool:
+    def set(
+        self,
+        redis_key: str,
+        redis_value: dict,
+        location: str = RedisLocations.ROOT.value,
+    ) -> bool:
         try:
             logger.info(f"Redis set operation called for key {redis_key}")
             result = redis_init.execute_command(
@@ -52,7 +63,12 @@ class RedisJson:
     # def delete(self, key):
     #     pass
 
-    def append(self, redis_key: str, redis_value: str, location: str = RedisLocations.ROOT.value) -> bool:
+    def append(
+        self,
+        redis_key: str,
+        redis_value: str,
+        location: str = RedisLocations.ROOT.value,
+    ) -> bool:
         try:
             logger.info(f"Redis append operation called for key {redis_key}")
             result = redis_init.execute_command(
