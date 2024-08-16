@@ -14,16 +14,11 @@ logger = logging.getLogger(__name__)
 
 
 class TimerStrategy:
-    """Strategy pattern for different timer behaviors."""
-
     async def run(self, game_id: int, duration: int, manager):
-        """Run the timer for the given duration."""
         raise NotImplementedError("This method should be implemented by subclasses.")
 
 
 class SimpleTimerStrategy(TimerStrategy):
-    """Simple strategy that just counts down."""
-
     async def run(self, game_id: int, duration: int, manager):
         for second in range(1, duration + 1):
             if TimerManager.instance().is_stopped(game_id):
@@ -42,8 +37,6 @@ class SimpleTimerStrategy(TimerStrategy):
 
 
 class TimerManager:
-    """Singleton class to manage all timers."""
-
     _instance = None
 
     def __init__(self):
