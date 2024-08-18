@@ -29,6 +29,7 @@ class CreateRoom(RoomEvents):
         """
         try:
             room_id = self.generate_unique_room_id()
+            game_key = f"room_id_game:{room_id}"
 
             logger.info(
                 f"Handling create_room event for username {self.room_data.player_name}"
@@ -52,6 +53,15 @@ class CreateRoom(RoomEvents):
                 redis_value=user_data,
                 location=RedisLocations.ROOT.value,
             )
+            game_data = {
+                "rounds": 0,
+                "guess_time": self.room_data.time,
+                "total_rounds": self.room_data.rounds,
+            }
+            if not RedisJson().set(redis_key=game_key, redis_value=game_data):
+                raise CreateRoomException(
+                    "There was error in setting the game data in redis."
+                )
 
             if result:
                 logger.info(

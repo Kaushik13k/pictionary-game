@@ -20,11 +20,7 @@ class SocketOperations(Enum):
     WORD_CHOOSEN = "word_choosen"
     END_GAME = "end_game"
 
-    # START_TURN = "start_turn"
-    # END_TURN = "end_turn"
-
     ROUND_BEGIN = "round_begin"
-    # END_ROUND = "end_round"
 
     WORD_GUESSED_BROADCAST = "word_guessed"
     WORD_GUESSED_PERSONAL = "guessed"

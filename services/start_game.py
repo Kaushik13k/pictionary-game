@@ -19,22 +19,24 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# TODO: REMOVE HARD CODED VALUES
-ROUNDS = 3
-
 
 class StartGame(SocketEvent):
     async def handle(
         self, message, manager, is_words_assign=True, current_turn=1, current_round=1
     ):
         try:
-            if current_round <= ROUNDS:
-                logger.info(f"Start game is been called.")
-                room_id = json.loads(message)["message"]["room_id"]
-                redis_key = f"room_id_players:{room_id}"
-                game_key = f"room_id_game:{room_id}"
+            logger.info(f"Start game is been called.")
+            room_id = json.loads(message)["message"]["room_id"]
 
-                game = await self.get_game_data(game_key, manager)
+            redis_key = f"room_id_players:{room_id}"
+            game_key = f"room_id_game:{room_id}"
+            game = await self.get_game_data(game_key, manager)
+
+            if current_round <= game["total_rounds"]:
+                logger.info(
+                    f"the current rund is = {current_round}, the total rounds is = {game['total_rounds']}"
+                )
+
                 user = json.loads(
                     RedisJson().get(
                         redis_key=redis_key, location=RedisLocations.NIL.value
@@ -48,7 +50,7 @@ class StartGame(SocketEvent):
 
                 if is_words_assign:
                     words = await assign_words(
-                        num_rounds=ROUNDS,
+                        num_rounds=game["total_rounds"],
                         num_players=len(players),
                         words_per_round=constants.NO_OF_WORDS_SELECTION,
                     )
@@ -110,10 +112,13 @@ class StartGame(SocketEvent):
 
     async def get_game_data(self, game_key, manager):
         logger.info("Setting the game data.")
-        game = RedisJson().get(redis_key=game_key, location=RedisLocations.NIL.value)
-        if game is None:
+        game = json.loads(
+            RedisJson().get(redis_key=game_key, location=RedisLocations.NIL.value)
+        )
+        if game["rounds"] == 0:
             logger.info("The game data is None.")
-            game = {"score_details": [], "rounds": 1}
+            game["score_details"] = []
+            game["rounds"] = 1
             await manager.broadcast(
                 {
                     "event": SocketOperations.ROUND_BEGIN.value,
@@ -126,7 +131,7 @@ class StartGame(SocketEvent):
                 )
         else:
             logger.info("The game data is not None.")
-            game = json.loads(game)
+            # game = json.loads(game)
             if game["turns"] == 0:
                 await manager.broadcast(
                     {
