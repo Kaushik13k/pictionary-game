@@ -32,3 +32,12 @@ This project is a Pictionary game implemented with Python and Docker. It's desig
   - Join Room: `/v1/join-room`
   - Fetch Room: `/v1/fetch-rooms`
   - Fetch Players: `/v1/fetch-players`
+  - Fetch Game Info: `/v1/fetch-game-info`
+- Connect Socket:  `ws://localhost:8000/v1/ws`
+
+## EVENT CALLS
+`{"event": "start_game", "message":{"room_id":"STRING"}}` 
+`{"event": "drawing_canvas", "message":{"sid":"STRING", "full_canvas_data":"STRING"}}`
+`{"event":"selected_word", "message": {"sid":"STRING", "word_id":INT, "room_id": "STRING"}}`
+`{"event": "chat_room", "message":{"sid":"STRING", "room_id":"STRING", "word":"STRING", "time_elapsed": INT}`
+

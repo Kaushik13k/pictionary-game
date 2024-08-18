@@ -1,12 +1,15 @@
 import json
 import logging
-from typing import List
-from pydantic import BaseModel
+import traceback
 
-from init.redis_init import redis_init
 from utils.timer import TimerManager
+from models.players import PlayersModel, Room
 from templates.socket_events import SocketEvent
-from enums.redis_operations import RedisOperations
+from redis_json.redis_operations import RedisJson
+from exceptions.exceptions import SelectedWordException
+
+from enums.redis_locations import RedisLocations
+from enums.socket_operations import SocketOperations
 
 
 logging.basicConfig(
@@ -16,42 +19,24 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-class Word(BaseModel):
-    id: int
-    word: str
-    description: str
-
-
-class Player(BaseModel):
-    player_id: int
-    is_active: bool
-    player_name: str
-    score: int
-    is_creator: bool
-    sid: str
-    words: List[List[Word]]
-
-
-class Room(BaseModel):
-    players: List[Player]
-
-
 class SelectedWord(SocketEvent):
     async def handle(self, message, manager):
         try:
-            logger.info(f"inside the selected wowrd!: {message}")
+            logger.info(f"Executing the Selected word: {message}")
             message = json.loads(message)["message"]
             game_key = f"room_id_game:{message['room_id']}"
             result_game = json.loads(
-                redis_init.execute_command(RedisOperations.JSON_GET.value, game_key)
+                RedisJson().get(redis_key=game_key, location=RedisLocations.NIL.value)
             )
-
-            # logger.info(f"the list of words is: {result_game}")
-            players_word_list = result_game["word_list"]
-            logger.info(f"players_word_list {players_word_list}")
+            if not result_game:
+                logger.error("Game not found")
+                raise SelectedWordException("Game not found")
 
             room = Room(
-                players=[Player(**player_group) for player_group in players_word_list]
+                players=[
+                    PlayersModel(**player_group)
+                    for player_group in result_game["word_list"]
+                ]
             )
 
             sid_to_player = {player.sid: player for player in room.players}
@@ -63,27 +48,27 @@ class SelectedWord(SocketEvent):
                 for word in word_list
             }
 
-            sid_to_find = message["sid"]
-            word_id_to_find = message["word_id"]
+            if (
+                message["sid"] in sid_to_player
+                and message["word_id"] in word_id_to_word
+            ):
+                word = word_id_to_word[message["word_id"]]
 
-            if sid_to_find in sid_to_player and word_id_to_find in word_id_to_word:
-                word = word_id_to_word[word_id_to_find]
-                logger.info(
-                    f"Word found: {word.word} with description: {word.description}"
-                )
-                game = {}
                 result_game["selected_word"] = word.word
-                logger.info(f"the result is---{result_game}")
-                result_game_resut = redis_init.execute_command(
-                    RedisOperations.JSON_SET.value,
-                    game_key,
-                    "$",
-                    json.dumps(result_game),
+                logger.info(f"Selected word-1: {result_game}")
+
+                result_game_resut = RedisJson().set(
+                    redis_key=game_key, redis_value=result_game
                 )
+                if not result_game_resut:
+                    logger.error("Error in setting selected word to redis.")
+                    raise SelectedWordException(
+                        "Error in setting selected word to redis."
+                    )
 
                 await manager.broadcast(
                     {
-                        "event": "word_choosen",
+                        "event": SocketOperations.WORD_CHOOSEN.value,
                         "value": {
                             "word_length": len(word.word),
                             "value": f"{'_ ' * len(word.word)}",
@@ -98,11 +83,17 @@ class SelectedWord(SocketEvent):
                 )
 
             else:
-                logger.info("Word not found")
+                logger.info("Word not found.")
+
             result_game = json.loads(
-                redis_init.execute_command(RedisOperations.JSON_GET.value, game_key)
+                RedisJson().get(redis_key=game_key, location=RedisLocations.NIL.value)
             )
-            # logger.info(f"the list of words is: {result_game}")
+            if not result_game:
+                logger.error("Game not found")
+                raise SelectedWordException("Game not found")
 
         except Exception as e:
-            logger.info("ERROR!")
+            logger.error(f"Error in SelectedWord")
+            logger.error(e)
+            logger.error(traceback.format_exc())
+            return

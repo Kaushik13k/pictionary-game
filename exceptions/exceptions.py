@@ -26,3 +26,8 @@ class ChatRoomException(Exception):
 class StartGameException(Exception):
     def __init__(self, msg: str = None):
         super().__init__(msg)
+
+
+class SelectedWordException(Exception):
+    def __init__(self, msg: str = None):
+        super().__init__(msg)

@@ -17,6 +17,7 @@ class SocketOperations(Enum):
 
     WORD_TO_SELECT = "select_word"
     CHOOSING_WORD = "choosing_word"
+    WORD_CHOOSEN = "word_choosen"
     END_GAME = "end_game"
 
     # START_TURN = "start_turn"
