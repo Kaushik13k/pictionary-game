@@ -63,6 +63,13 @@ class ConnectionManager:
 
     async def disconnect(self, client_id: str):
         del self.active_connections[client_id]
+        await self.broadcast(
+            {
+                "event": SocketOperations.DISCONNECT.value,
+                "value": f"Client #{client_id} left the chat.",
+            },
+            client_id,
+        )
 
     async def send_message(self, message: str, websocket: WebSocket):
         await websocket.send_text(message)

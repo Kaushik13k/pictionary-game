@@ -59,5 +59,4 @@ async def websocket_endpoint(websocket: WebSocket):
                 await websocket.send_text("Unknown event")
 
     except WebSocketDisconnect:
-        manager.disconnect(client_id)
-        await manager.broadcast(f"Client #{client_id} left the chat")
+        await manager.disconnect(client_id)
