@@ -8,6 +8,7 @@ from typing import List, Dict, Union
 from init.redis_init import redis_init
 from services.socket_event import SocketEvent
 from enums.redis_operations import RedisOperations
+from services.timer import TimerManager
 from services.words_assignment import assign_words
 
 
@@ -93,6 +94,11 @@ class SelectedWord(SocketEvent):
                         },
                     },
                     message["sid"],
+                )
+                TimerManager.instance().start_timer(message["room_id"], 5, manager)
+                # TODO: Start timer for 60 seconds
+                logger.info(
+                    f"message: Timer for Game {message['room_id']} started for 60 seconds"
                 )
 
             else:

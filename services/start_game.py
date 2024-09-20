@@ -25,7 +25,7 @@ DRAWER_TIME_MAX_POINTS = 100
 class StartGame(SocketEvent):
     async def handle(self, message, manager, words_assign=True, current_round=1):
         try:
-            logger.info(f"StartGame...")
+            logger.info(f"The Game is started!...")
             room_id = json.loads(message)["message"]["room_id"]
             redis_key = f"room_id_players:{room_id}"
             game_key = f"room_id_game:{room_id}"
@@ -75,39 +75,6 @@ class StartGame(SocketEvent):
                         "value": f"{drawer['player_name']} is choosing.",
                     },
                     drawer["sid"],
-                )
-                await asyncio.sleep(SELECTION_TIME + GUESS_TIME)
-
-                await manager.broadcast(
-                    {"event": "time_up", "value": f"Time's up."},
-                )
-
-                logger.info(f"calling the calculation logic")
-                user = await self.calculate_guesser_scores(game_key, redis_key, drawer)
-                logger.info(f"calculation logic done")
-
-                game["score_details"] = []
-
-                game["turns"] = game.get("turns", 0) + 1
-                self.set_game_data(game_key, game)
-                logger.info(f"score_details made empty")
-
-                players = user["members"]
-                if game["turns"] >= len(players):
-                    await self.end_round(game, game_key, redis_key, manager)
-                logger.info(f"end_round is called")
-                logger.info(f"got user details: {user}")
-
-                user["members"] = players[1:] + players[:1]
-                logger.info(f"New player order: {players}")
-                self.set_user_data(redis_key, user)
-                current_round += 1
-
-                await self.handle(
-                    message=message,
-                    manager=manager,
-                    words_assign=False,
-                    current_round=current_round,
                 )
             else:
                 await manager.broadcast(
