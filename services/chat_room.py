@@ -41,7 +41,8 @@ class ChatRoom(SocketEvent):
                 RedisJson().get(redis_key=game_key, location=RedisLocations.NIL.value)
             )
             if not game_result:
-                raise ChatRoomException("The game result are not found in redis.")
+                raise ChatRoomException(
+                    "The game result are not found in redis.")
 
             players = json.loads(
                 RedisJson().get(
@@ -57,11 +58,60 @@ class ChatRoom(SocketEvent):
                 filter(lambda player: player["sid"] == message["sid"], players)
             )
             if not player_result:
-                raise ChatRoomException("The players result is not found in redis.")
+                raise ChatRoomException(
+                    "The players result is not found in redis.")
 
             player_item, *rest = player_result
 
-            if message["word"].lower() == selected_word.lower():
+            def check_word_match(guess, answer, exact_match=False):
+                guess = guess.lower()
+                answer = answer.lower()
+
+                if exact_match:
+                    return guess == answer
+
+                if answer in guess:
+                    return True
+
+                if len(guess) >= 3:
+                    common_chars = sum(1 for c in guess if c in answer)
+                    similarity = common_chars / len(answer)
+                    if similarity > 0.75:
+                        return True
+                return False
+
+            if players[0]["sid"] == message["sid"]:
+                if check_word_match(message["word"], selected_word, exact_match=False):
+                    await manager.send_personal_message(
+                        {
+                            "event": SocketOperations.CHAT_ROOM.value,
+                            "value": {
+                                "word": "You cannot give hints about the answer!",
+                                "player_name": "System",
+                            },
+                        },
+                        message["sid"],
+                    )
+                    return
+
+                await manager.broadcast(
+                    {
+                        "event": SocketOperations.CHAT_ROOM.value,
+                        "value": {
+                            "word": message["word"],
+                            "player_name": player_item.get("player_name"),
+                        },
+                    },
+                    message["sid"],
+                )
+                return
+
+            if players[0]["sid"] == message["sid"]:
+                logger.warning(
+                    "Drawer attempted to guess after similarity check - this shouldn't happen")
+                return
+
+            if check_word_match(message["word"], selected_word, exact_match=True):
                 logger.info("The word is matched.")
 
                 await manager.send_personal_message(
@@ -91,7 +141,8 @@ class ChatRoom(SocketEvent):
                     redis_key=game_key, redis_value=game_result
                 )
                 if not is_set_game_data:
-                    raise ChatRoomException("The game result are not set in redis.")
+                    raise ChatRoomException(
+                        "The game result are not set in redis.")
 
                 if len(game_result["score_details"]) == len(players) - 1:
                     TimerManager.instance().stop_timer(message["room_id"])
