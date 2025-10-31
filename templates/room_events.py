@@ -12,9 +12,10 @@ class RoomEvents(ABC):
 
     @abstractmethod
     def handle_room(self):
-        pass
+        ...
 
     def generate_unique_room_id(self):
         while True:
-            room_id = str(uuid.uuid4()) + "-" + str(int((datetime.now()).timestamp()))
+            room_id = str(uuid.uuid4()) + "-" + \
+                str(int((datetime.now()).timestamp()))
             return room_id

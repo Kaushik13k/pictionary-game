@@ -9,7 +9,7 @@ from enums.redis_operations import RedisOperations
 
 class ConcreteStartGame(StartGame):
     async def execute(self, *args, **kwargs):
-        pass
+        ...
 
 
 logging.basicConfig(
@@ -81,7 +81,8 @@ async def calculate_drawer_scores(players_guessed, total_time, total_players):
     if players_guessed == total_players:
         guessing_score = DRAWER_GUESS_MAX_POINTS
     else:
-        guessing_score = (players_guessed / total_players) * DRAWER_GUESS_MAX_POINTS
+        guessing_score = (players_guessed / total_players) * \
+            DRAWER_GUESS_MAX_POINTS
 
     # Timing points
     timing_score = (
@@ -162,7 +163,8 @@ async def calculate_guesser_scores(game_key, redis_key, drawer):
                 logger.info(f"updating the score: {total_score}")
                 p_model.score = p_model.score + total_score
 
-    logger.info(f"the updated score details of the player is: {player_score_details}")
+    logger.info(
+        f"the updated score details of the player is: {player_score_details}")
 
     # Optionally log the updated players_model
     for i in players_model:

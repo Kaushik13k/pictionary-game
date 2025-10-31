@@ -18,22 +18,22 @@ logger = logging.getLogger(__name__)
 
 class ConcreteStartGame(StartGame):
     async def execute(self, *args, **kwargs):
-        pass
+        ...
 
 
 class ConcreteSelectedWord(SelectedWord):
     async def execute(self, *args, **kwargs):
-        pass
+        ...
 
 
 class ConcreteDrawingCanvas(DrawingCanvas):
     async def execute(self, *args, **kwargs):
-        pass
+        ...
 
 
 class ConcreteChatRoom(ChatRoom):
     async def execute(self, *args, **kwargs):
-        pass
+        ...
 
 
 class ConnectionManager:

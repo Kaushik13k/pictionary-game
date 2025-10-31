@@ -61,7 +61,7 @@ class RedisJson:
             return False
 
     # def delete(self, key):
-    #     pass
+    #     ...
 
     def append(
         self,
@@ -84,7 +84,8 @@ class RedisJson:
             logger.error(f"Error in Redis append operation.")
             return False
         except Exception as e:
-            logger.error(f"Error in Redis append operation for key {redis_key}")
+            logger.error(
+                f"Error in Redis append operation for key {redis_key}")
             logger.error(e)
             logger.error(traceback.format_exc())
             return False
@@ -103,7 +104,8 @@ class RedisJson:
             logger.error(f"Error in Redis length operation.")
             return None
         except Exception as e:
-            logger.error(f"Error in Redis length operation for key {redis_key}")
+            logger.error(
+                f"Error in Redis length operation for key {redis_key}")
             logger.error(e)
             logger.error(traceback.format_exc())
             return None
